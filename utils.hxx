@@ -6,6 +6,9 @@
 #include "TSystem.h"
 #include "TMath.h"
 
+#include "RooProdPdf.h"
+#include "RooArgSet.h"
+
 #include "log.hxx"
 
 using namespace std;
@@ -105,6 +108,39 @@ vector<string> parseString(string str, string sep)
   }
 
   return parsed;
+}
+
+// _____________________________________________________________________________
+// Split a RooProdPdf into its components
+void FindUniqueProdComponents( RooProdPdf* Pdf, RooArgSet& Components )
+{
+  static int counter = 0;
+  counter++;
+
+  if (counter > 50) {
+    LOG(logERROR) << "FindUniqueProdComponents detected infinite loop. Please check.";
+    exit(1);
+  }
+
+  RooArgList pdfList = Pdf->pdfList();
+  if (pdfList.getSize() == 1) {
+    LOG(logINFO) << "FindUniqueProdComponents " << pdfList.at(0)->GetName() << " is fundamental.";
+    Components.add(pdfList);
+  } else {
+    TIterator* pdfItr = pdfList.createIterator();
+    RooAbsArg* nextArg;
+    while ((nextArg = (RooAbsArg*)pdfItr->Next())) {
+      RooProdPdf* Pdf = (RooProdPdf*)nextArg;
+      if (string(Pdf->ClassName()) != "RooProdPdf") {
+        LOG(logINFO) << "FindUniqueProdComponents " << Pdf->GetName() << " is no RooProdPdf. Adding it.";
+        Components.add(*Pdf);
+        continue;
+      }
+      FindUniqueProdComponents(Pdf, Components);
+    }
+    delete pdfItr;
+  }
+  counter = 0;
 }
 
 #endif /* _UTILS_ */
