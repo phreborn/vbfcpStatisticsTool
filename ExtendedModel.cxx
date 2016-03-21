@@ -7,6 +7,7 @@
 #include "RooAddPdf.h"
 #include "RooStarMomentMorph.h"
 #include "RooMultiPdf.h"
+#include "RooGaussian.h"
 
 #include "ExtendedModel.hxx"
 #include "utils.hxx"
@@ -187,6 +188,19 @@ void ExtendedModel::fixNuisanceParameters()
     v->setConstant(1);
   }
 }
+
+// _____________________________________________________________________________
+// Fix all parameters of interest
+void ExtendedModel::fixParametersOfInterest()
+{
+  for (RooLinkedListIter it = fPOIs->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+    Double_t value = v->getVal();
+    string name = v->GetName();
+    coutI(ObjectHandling) << "Fixing parameter of interest " << name << " at value " << value << endl;
+    v->setConstant(1);
+  }
+}
+
 // _____________________________________________________________________________
 // Fix a subset of the nuisance parameters at the specified values
 void ExtendedModel::fixNuisanceParameters( string fixName )
