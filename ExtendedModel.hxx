@@ -53,6 +53,7 @@ public:
 
   void fixNuisanceParameters();
   void fixNuisanceParameters( string fixName );
+  void setInitialErrors();
 
 // _____________________________________________________________________________
 protected:
