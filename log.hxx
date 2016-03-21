@@ -1,9 +1,10 @@
+// Author      : Stefan Gadatsch
+// Email       : stefan.gadatsch@cern.ch
+// Date        : 2016-03-17
+// Description : Minimal logging system, adapted from https://github.com/dominikschnitzer/minilog
+
 #ifndef _LOG_
 #define _LOG_
-
-// _____________________________________________________________________________
-// Minimal logging system, adapted from
-// https://github.com/dominikschnitzer/minilog
 
 #include <iostream>
 #include <sstream>
