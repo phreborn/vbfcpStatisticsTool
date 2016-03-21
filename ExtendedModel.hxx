@@ -52,6 +52,7 @@ public:
   RooArgSet* GetObservables() { return fObs; }
 
   void fixNuisanceParameters();
+  void fixNuisanceParameters( string fixName );
 
 // _____________________________________________________________________________
 protected:

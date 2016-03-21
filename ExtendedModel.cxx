@@ -187,3 +187,38 @@ void ExtendedModel::fixNuisanceParameters()
     v->setConstant(1);
   }
 }
+// _____________________________________________________________________________
+// Fix a subset of the nuisance parameters at the specified values
+void ExtendedModel::fixNuisanceParameters( string fixName )
+{
+  vector<string> parsed = parseString(fixName, ",");
+
+  for (size_t i = 0; i < parsed.size(); i++) {
+     TString thisName = parsed[i].c_str();
+     TString thisVal;
+     if (thisName.Contains("[")) {
+       assert(thisName.Contains("]"));
+       TObjArray* thisNameArray = thisName.Tokenize("[");
+       thisName = ((TObjString*)thisNameArray->At(0))->GetString();
+       thisVal = ((TObjString*)thisNameArray->At(1))->GetString();
+       thisVal.ReplaceAll("]","");
+     }
+
+     RooRealVar* par = (RooRealVar*)fWorkspace->var(thisName.Data());
+     if (!par) {
+       coutE(ObjectHandling) << "Nuisance parameter " << thisName.Data() << " does not exist." << endl;
+       exit(-1);
+     }
+
+     double value = par->getVal();
+     if (thisVal.IsFloat()) {
+       value = thisVal.Atof();
+       par->setVal(value);
+     }
+
+     coutI(ObjectHandling) << "Fixing nuisance parameter " << thisName.Data() << " at value " << value << endl;
+     par->setConstant(1);
+   }
+
+}
+
