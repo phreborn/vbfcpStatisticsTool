@@ -80,29 +80,29 @@ void ExtendedModel::initialise()
     }
   }
 
-  if (fFixCache) {
-    coutP(InputArguments) << "Fixing cache of early RooStarMomentMorph pdf" << endl;
-    RooFIter iter = fWorkspace->components().fwdIterator();
-    RooAbsArg* arg;
-    while ((arg = iter.next())) {
-      if (arg->IsA() == RooStarMomentMorph::Class()) {
-        ((RooStarMomentMorph*)arg)->fixCache();
-        coutI(InputArguments) << "Fixing cache of " << arg->GetName() << endl;
-      }
-    }
-  }
-
-  if (fFixMulti) {
-    coutP(InputArguments) << "De-activating level 2 constant term optimization for RooMultiPdf" << endl;
-    RooFIter iter = fWorkspace->components().fwdIterator();
-    RooAbsArg* arg;
-    while ((arg = iter.next())) {
-      if (arg->IsA() == RooMultiPdf::Class()) {
-        arg->setAttribute("NOCacheAndTrack");
-        coutI(InputArguments) << "De-activation of level 2 constant term optimization for " << arg->GetName() << endl;
-      }
-    }
-  }
+  // if (fFixCache) {
+  //   coutP(InputArguments) << "Fixing cache of early RooStarMomentMorph pdf" << endl;
+  //   RooFIter iter = fWorkspace->components().fwdIterator();
+  //   RooAbsArg* arg;
+  //   while ((arg = iter.next())) {
+  //     if (arg->IsA() == RooStarMomentMorph::Class()) {
+  //       ((RooStarMomentMorph*)arg)->fixCache();
+  //       coutI(InputArguments) << "Fixing cache of " << arg->GetName() << endl;
+  //     }
+  //   }
+  // }
+  //
+  // if (fFixMulti) {
+  //   coutP(InputArguments) << "De-activating level 2 constant term optimization for RooMultiPdf" << endl;
+  //   RooFIter iter = fWorkspace->components().fwdIterator();
+  //   RooAbsArg* arg;
+  //   while ((arg = iter.next())) {
+  //     if (arg->IsA() == RooMultiPdf::Class()) {
+  //       arg->setAttribute("NOCacheAndTrack");
+  //       coutI(InputArguments) << "De-activation of level 2 constant term optimization for " << arg->GetName() << endl;
+  //     }
+  //   }
+  // }
 
   if (kTRUE) {
     coutP(InputArguments) << "De-activating level 2 constant term optimization for specified pdfs" << endl;
