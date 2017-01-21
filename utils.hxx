@@ -170,4 +170,49 @@ inline void FindUniqueProdComponents( RooProdPdf* Pdf, RooArgSet& Components )
   counter = 0;
 }
 
+// _____________________________________________________________________________
+// Return a TGraph with the points of intersection (taken from https://root.cern.ch/phpBB3/viewtopic.php?t=12048)
+inline TGraph* findIntersection(TGraph &a, TGraph &b)
+{
+  TGraph *interPoint = new TGraph();
+  int i = 0;
+
+  // Loop over all points in this TGraph
+  for(int a_i = 0; a_i < a.GetN()-1; ++a_i) {
+    // Loop over all points in the other TGraph
+    for(int b_i = 0; b_i < b.GetN()-1; ++b_i) {
+
+      // Get the current point, and the next point for each of the objects
+      double x1, y1, x2, y2 = 0;
+      double ax1, ay1, ax2, ay2 = 0;
+      a.GetPoint(a_i, x1, y1);
+      a.GetPoint(a_i+1, x2, y2);
+      b.GetPoint(b_i, ax1, ay1);
+      b.GetPoint(b_i+1, ax2, ay2);
+
+      // Calculate the intersection between two straight lines, x axis
+      double x = (ax1 *(ay2 *(x1-x2)+x2 * y1 - x1 * y2 )+ ax2 * (ay1 * (-x1+x2)- x2 * y1+x1 * y2)) / (-(ay1-ay2) * (x1-x2)+(ax1-ax2)* (y1-y2));
+
+      // Calculate the intersection between two straight lines, y axis
+      double y = (ax1 * ay2 * (y1-y2)+ax2 * ay1 * (-y1+y2)+(ay1-ay2) * (x2 * y1-x1 * y2))/(-(ay1-ay2) * (x1-x2)+(ax1-ax2) * (y1-y2));
+
+      // Find the tightest interval along the x-axis defined by the four points
+      double xrange_min = max(min(x1, x2), min(ax1, ax2));
+      double xrange_max = min(max(x1, x2), max(ax1, ax2));
+
+      if ((x1 == ax1 and y1 == ay1)or (x2 == ax2 and y2 == ay2)) {
+        // If points from the two lines overlap, they are trivially intersecting
+        interPoint->SetPoint(i, (x1 == ax1 and y1 == ay1) ? x1 : x2, (x1 == ax1 and y1 == ay1) ? y1 : y2);
+        i++;
+      } else if(x > xrange_min && x < xrange_max) {
+        // If the intersection between the two lines is within the tight range, add it to the list of intersections.
+        interPoint->SetPoint(i,x, y);
+        i++;
+      }
+    }
+  }
+
+  return interPoint;
+}
+
 #endif /* _UTILS_ */
