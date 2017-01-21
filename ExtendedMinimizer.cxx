@@ -8,6 +8,7 @@
 #include "TMath.h"
 #include "TMatrixT.h"
 #include "TMatrixDSymEigen.h"
+#include "TRandom3.h"
 
 #include "RooMinimizer.h"
 #include "RooFitResult.h"
@@ -462,4 +463,167 @@ Double_t ExtendedMinimizer::findSigma( double nll_min, double val_guess, double 
   cmdList = scanCmdList;
 
   return err;
+}
+
+// _____________________________________________________________________________
+pair<TGraph*, TGraph*> ExtendedMinimizer::createProfile(RooRealVar* var, double lo, double hi, int nbins)
+{
+  map< double, double > map_poi2nll;
+
+  ROOT::Math::MinimizerOptions::SetDefaultPrintLevel(-1);
+  RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
+
+  RooArgSet* vars = fPdf->getVariables();
+  RooStats::RemoveConstantParameters(vars);
+
+  // Unconditional fit
+  RooLinkedList scanCmdList(fScanCmdList);
+
+  const RooCmdArg& arg2 = ReuseNLL(1); scanCmdList.Add((TObject*)&arg2);
+
+  minimize(scanCmdList);
+  map_poi2nll[var->getVal()] = 2 * fMinNll;
+  RooArgSet* ucmles = dynamic_cast<RooArgSet*>(vars->snapshot());
+
+  scanCmdList.Remove((TObject*)&arg2);
+
+  fScanCmdList = scanCmdList;
+
+  // Perform the scan
+  double delta_x = (hi - lo) / nbins;
+  for (int i = 0; i <= nbins; i++) {
+    *vars = *ucmles;
+    var->setVal(lo + i * delta_x);
+    var->setConstant(1);
+
+    const RooCmdArg& arg2 = ReuseNLL(1); scanCmdList.Add((TObject*)&arg2);
+
+    minimize(scanCmdList);
+    map_poi2nll[var->getVal()] = 2 * fMinNll;
+
+    scanCmdList.Remove((TObject*)&arg2);
+
+    fScanCmdList = scanCmdList;
+
+    var->setConstant(0);
+  }
+
+  pair<TGraph*, TGraph*> graphs = prepareProfile(map_poi2nll);
+
+  return graphs;
+}
+
+// _____________________________________________________________________________
+// Prepare 1d profile likelhood
+pair<TGraph*, TGraph*> ExtendedMinimizer::prepareProfile(map< double, double > map_poi2nll) {
+  vector<double> x, y;
+  int nbins = map_poi2nll.size() - 1;
+
+  double xlo =  numeric_limits<double>::infinity();
+  double xhi = -numeric_limits<double>::infinity();
+
+  for (map< double, double>::iterator it_poi = map_poi2nll.begin(); it_poi != map_poi2nll.end(); ++it_poi) {
+    double nll = it_poi->second;
+    if (nll == nll && fabs(nll) < pow(10, 20)) {
+      x.push_back(it_poi->first);
+      y.push_back(it_poi->second);
+    }
+  }
+
+  int nrPoints = x.size();
+
+  for (int i = 0; i < nrPoints-1; i++) {
+    for (int j = 0; j < nrPoints-1-i; j++) {
+      if (x[j] > x[j+1]) {
+        swap(x[j], x[j+1]);
+        swap(y[j], y[j+1]);
+      }
+    }
+  }
+
+  if (x[0] < xlo) xlo = x[0];
+  if (x[nrPoints-1] > xhi) xhi = x[nrPoints-1];
+
+  TGraph* g = new TGraph(nrPoints, getAry(x), getAry(y));
+
+  double minNll = TMath::Infinity();
+  double minNll_x = 0.0;
+
+  for (int i_point = 0; i_point < g->GetN(); ++i_point) {
+    double xi, yi = 0;
+    g->GetPoint(i_point, xi, yi);
+    if (yi < minNll) {
+      minNll = yi;
+      minNll_x = xi;
+    }
+  }
+
+  for (int i_point = 0; i_point < g->GetN(); ++i_point) {
+    double xi, yi = 0;
+    g->GetPoint(i_point, xi, yi);
+    yi -= minNll;
+    g->SetPoint(i_point, xi, yi);
+  }
+
+  minNll = TMath::Infinity();
+  minNll_x = 0.0;
+
+  // Make smooth interpolated graph for every folder in poi range, find minimum nll
+  vector<double> x_interpolated_coarse, y_interpolated_coarse;
+
+  double stepsize_coarse = fabs(xhi - xlo) / nbins;
+  for (double thisX = xlo; thisX <= xhi; thisX += stepsize_coarse) {
+    double thisY = g->Eval(thisX, 0);
+    x_interpolated_coarse.push_back(thisX);
+    y_interpolated_coarse.push_back(thisY);
+  }
+
+  int nrPoints_interpolated_coarse = x_interpolated_coarse.size();
+  TGraph* g_interpolated_coarse = new TGraph(nrPoints_interpolated_coarse, getAry(x_interpolated_coarse), getAry(y_interpolated_coarse));
+
+  vector<double> x_interpolated, y_interpolated;
+  bool twoStepInterpolation = false;
+
+  double stepsize = fabs(xhi - xlo) / (10*nbins);
+  for (double thisX = xlo; thisX <= xhi; thisX += stepsize) {
+    double thisY = 0.0;
+    if (twoStepInterpolation) thisY = g_interpolated_coarse->Eval(thisX, 0, "S");
+    else thisY = g->Eval(thisX, 0, "S");
+    x_interpolated.push_back(thisX);
+    y_interpolated.push_back(thisY);
+  }
+
+  int nrPoints_interpolated = x_interpolated.size();
+  TGraph* g_interpolated = new TGraph(nrPoints_interpolated, getAry(x_interpolated), getAry(y_interpolated));
+
+  for (int i_point = 0; i_point < g_interpolated->GetN(); ++i_point) {
+    double xi, yi = 0;
+    g_interpolated->GetPoint(i_point, xi, yi);
+    if (yi < minNll) {
+      minNll = yi;
+      minNll_x = xi;
+    }
+  }
+
+  for (int i_point = 0; i_point < g->GetN(); ++i_point) {
+    double xi, yi = 0;
+    g->GetPoint(i_point, xi, yi);
+    yi -= minNll;
+    g->SetPoint(i_point, xi, yi);
+  }
+
+  for (int i_point = 0; i_point < g_interpolated->GetN(); ++i_point) {
+    double xi, yi = 0;
+    g_interpolated->GetPoint(i_point, xi, yi);
+    yi -= minNll;
+    g_interpolated->SetPoint(i_point, xi, yi);
+  }
+
+  g->SetLineWidth(2);
+  g->SetMarkerStyle(20);
+
+  g_interpolated->SetLineWidth(2);
+  g_interpolated->SetMarkerStyle(20);
+
+  return make_pair(g, g_interpolated);
 }

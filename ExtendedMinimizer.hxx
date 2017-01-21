@@ -39,6 +39,8 @@
 
 #include "RooStats/ModelConfig.h"
 
+#include "utils.hxx"
+
 using namespace std;
 using namespace RooFit;
 using namespace RooStats;
@@ -69,6 +71,8 @@ public:
   double GetMinNll() { return fMinNll; }
   RooAbsReal* GetNll() { return fNll; }
 
+  pair<TGraph*, TGraph*> createProfile(RooRealVar* var, double lo, double hi, int nbins);
+
   // Steering
   int minimize( const RooCmdArg& arg1 = RooCmdArg::none(), const RooCmdArg& arg2 = RooCmdArg::none(), const RooCmdArg& arg3 = RooCmdArg::none(), const RooCmdArg& arg4 = RooCmdArg::none(), const RooCmdArg& arg5 = RooCmdArg::none(), const RooCmdArg& arg6 = RooCmdArg::none(), const RooCmdArg& arg7 = RooCmdArg::none(), const RooCmdArg& arg8 = RooCmdArg::none(), const RooCmdArg& arg9 = RooCmdArg::none(), const RooCmdArg& arg10 = RooCmdArg::none(), const RooCmdArg& arg11 = RooCmdArg::none(), const RooCmdArg& arg12 = RooCmdArg::none() );
   int minimize( const RooLinkedList& cmdList );
@@ -94,6 +98,7 @@ protected:
   virtual double findSigma( double nll_min, double val_guess, double val_mle, const RooRealVar* par, RooLinkedList& cmdList, double nsigma = +1.0, double precision = -1.0, double fitTol = 1.0 );
   virtual void findSigma();
   virtual int robustMinimize();
+  pair<TGraph*, TGraph*> prepareProfile(map< double, double > map_poi2nll);
 
 // _____________________________________________________________________________
 private:
