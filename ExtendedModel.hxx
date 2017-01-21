@@ -47,7 +47,8 @@ public:
   ExtendedModel( string ModelName, string FileName, string WsName,
                  string ModelConfigName, string DataName, string SnapshotName,
                  bool binnedLikelihood = true, string TagAsMeasurement = "pdf_",
-                 bool FixCache = true, bool FixMulti = true );
+                 bool FixCache = true, bool FixMulti = true,
+                 int InterpolationCode = -1 );
   virtual ~ExtendedModel();
 
   RooWorkspace* GetWorkspace() { return fWorkspace; }
@@ -80,6 +81,7 @@ private:
   string fTagAsMeasurement;
   bool fFixCache;
   bool fFixMulti;
+  int fInterpolationCode;
 
   TFile* fFile;
   RooWorkspace* fWorkspace;

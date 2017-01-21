@@ -10,12 +10,20 @@
 #include "RooGaussian.h"
 #include "RooRealVar.h"
 
+#include "RooStats/HistFactory/FlexibleInterpVar.h"
+#include "RooStats/HistFactory/PiecewiseInterpolation.h"
+
 #include "ExtendedModel.hxx"
 #include "utils.hxx"
 
+using namespace std;
+using namespace RooFit;
+using namespace RooStats;
+using namespace HistFactory;
+
 // _____________________________________________________________________________
 // Constructor
-ExtendedModel::ExtendedModel( string ModelName, string FileName, string WsName, string ModelConfigName, string DataName, string SnapshotName, bool binnedLikelihood, string TagAsMeasurement, bool FixCache, bool FixMulti )
+ExtendedModel::ExtendedModel( string ModelName, string FileName, string WsName, string ModelConfigName, string DataName, string SnapshotName, bool binnedLikelihood, string TagAsMeasurement, bool FixCache, bool FixMulti, int InterpolationCode )
   :
   TNamed( ModelName.c_str(), ModelName.c_str() ),
   fFileName( FileName ),
@@ -26,9 +34,9 @@ ExtendedModel::ExtendedModel( string ModelName, string FileName, string WsName, 
   fBinnedLikelihood( binnedLikelihood ),
   fTagAsMeasurement( TagAsMeasurement ),
   fFixCache( FixCache ),
-  fFixMulti( FixMulti )
+  fFixMulti( FixMulti ),
+  fInterpolationCode( InterpolationCode )
 {
-
   initialise();
 
   coutP(InputArguments) << "ExtendedModel::ExtendedModel(" << fName <<") created" << endl;
@@ -53,6 +61,21 @@ void ExtendedModel::initialise()
   if (!fWorkspace) {
     coutE(InputArguments) << "Something went wrong when loading the workspace " << fWsName << endl;
     exit(-1);
+  }
+
+  // Modify interpolation codes
+  if (fInterpolationCode != -1) {
+    RooFIter iter = fWorkspace->components().fwdIterator();
+    RooAbsArg* arg;
+    while((arg = iter.next())) {
+      if (arg->IsA() == FlexibleInterpVar::Class()) {
+        (static_cast<FlexibleInterpVar*>(arg))->setAllInterpCodes(fInterpolationCode);
+        coutP(InputArguments) << arg->GetName() << " FlexibleInterpVar interpolation code set to " << fInterpolationCode << endl;
+      } else if (arg->IsA() == PiecewiseInterpolation::Class()) {
+        (static_cast<PiecewiseInterpolation*>(arg))->setAllInterpCodes(fInterpolationCode);
+        coutP(InputArguments) << arg->GetName() << " PiecewiseInterpolation interpolation code set to " << fInterpolationCode << endl;
+      }
+    }
   }
 
   // Fixes for known features
