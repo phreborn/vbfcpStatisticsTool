@@ -116,6 +116,28 @@ inline vector<string> parseString(string str, string sep)
 }
 
 // _____________________________________________________________________________
+// Convert vector to array
+inline double* getAry(vector<double> numbers) {
+  int nrPoints = numbers.size();
+  double* ary = new double[nrPoints];
+  for (int i=0; i<nrPoints; i++) {
+    ary[i] = numbers[i];
+  }
+  return ary;
+}
+
+// _____________________________________________________________________________
+// Convert deque to array
+inline double* getAry(deque<double> numbers) {
+  int nrPoints = numbers.size();
+  double* ary = new double[nrPoints];
+  for (int i=0; i<nrPoints; i++) {
+    ary[i] = numbers[i];
+  }
+  return ary;
+}
+
+// _____________________________________________________________________________
 // Split a RooProdPdf into its components
 inline void FindUniqueProdComponents( RooProdPdf* Pdf, RooArgSet& Components )
 {
