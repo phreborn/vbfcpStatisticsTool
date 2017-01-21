@@ -6,6 +6,7 @@
 #include "ExtendedMinimizer.hxx"
 
 #include "TMath.h"
+#include "TMatrixT.h"
 #include "TMatrixDSymEigen.h"
 
 #include "RooMinimizer.h"

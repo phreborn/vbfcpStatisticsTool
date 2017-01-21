@@ -1,7 +1,16 @@
-// Author      : Stefan Gadatsch
-// Email       : stefan.gadatsch@cern.ch
-// Date        : 2016-03-17
-// Description : Minimizer with extended functionality
+/**
+ *  @file    ExtendedModel.hxx
+ *  @author  Stefan Gadatsch
+ *  @date    17/03/2016
+ *  @version 0.0.1
+ *
+ *  @brief Minimizer with extended functionality.
+ *
+ *  @section DESCRIPTION
+ *
+ * Minimizer with extended functionality.
+ *
+ */
 
 #ifndef EXTENDEDMINIMIZER
 #define EXTENDEDMINIMIZER
@@ -12,6 +21,9 @@
 #include <sstream>
 
 #include "TNamed.h"
+#include "TMatrixT.h"
+#include "TVectorDfwd.h"
+#include "TVectorT.h"
 #include "Math/MinimizerOptions.h"
 
 #include "RooAbsPdf.h"
@@ -23,6 +35,7 @@
 #include "RooArgList.h"
 #include "RooMsgService.h"
 #include "RooMinimizer.h"
+#include "RooFitResult.h"
 
 #include "RooStats/ModelConfig.h"
 
@@ -38,8 +51,6 @@ class ExtendedMinimizer : public TNamed {
 
 // _____________________________________________________________________________
 public:
-
-  // Constructor and destructor
   ExtendedMinimizer( std::string MinimizerName, RooAbsPdf* pdf, RooAbsData* data );
   virtual ~ExtendedMinimizer();
 
@@ -64,7 +75,6 @@ public:
 
 // _____________________________________________________________________________
 public:
-
   static RooCmdArg Eigen(Bool_t flag = kTRUE) { return RooCmdArg("Eigen",flag,0,0,0,0,0,0,0); }
   static RooCmdArg NumRetryFit(Int_t retry) { return RooCmdArg("NumRetryFit",retry,0,0,0,0,0,0,0); }
   static RooCmdArg Eps(double eps) { return RooCmdArg("Eps",0,0,eps,0,0,0,0,0); }
@@ -77,7 +87,6 @@ public:
 
 // _____________________________________________________________________________
 protected:
-
   void createMinimizer();
   int parseConfig( const RooLinkedList& cmdList );
   double UseLimits( const RooRealVar* par, double val );
@@ -88,7 +97,6 @@ protected:
 
 // _____________________________________________________________________________
 private:
-
   TFile* fFile;
   RooAbsPdf* fPdf;
   RooAbsData* fData;
@@ -131,9 +139,7 @@ private:
 
 // _____________________________________________________________________________
 protected:
-
-  // ClassDef(ExtendedMinimizer, 1)
-
+  ClassDef(ExtendedMinimizer, 1)
 };
 
 #endif

@@ -1,7 +1,16 @@
-// Author      : Stefan Gadatsch
-// Email       : stefan.gadatsch@cern.ch
-// Date        : 2016-03-17
-// Description : Load models from ROOT file and prepare them for fits
+/**
+ *  @file    ExtendedModel.hxx
+ *  @author  Stefan Gadatsch
+ *  @date    17/03/2016
+ *  @version 0.0.1
+ *
+ *  @brief Load models from ROOT file and prepare them for fits.
+ *
+ *  @section DESCRIPTION
+ *
+ * Load models from ROOT file and prepare them for fits.
+ *
+ */
 
 #ifndef EXTENDEDMODEL
 #define EXTENDEDMODEL
@@ -35,13 +44,12 @@ class ExtendedModel : public TNamed {
 
 // _____________________________________________________________________________
 public:
-
-  // Constructor and destructor
   ExtendedModel( string ModelName, string FileName, string WsName,
                  string ModelConfigName, string DataName, string SnapshotName,
                  bool binnedLikelihood = true, string TagAsMeasurement = "pdf_",
                  bool FixCache = true, bool FixMulti = true );
   virtual ~ExtendedModel();
+
   RooWorkspace* GetWorkspace() { return fWorkspace; }
   ModelConfig* GetModelConfig() { return fModelConfig; }
   RooAbsPdf* GetPdf() { return fPdf; }
@@ -59,12 +67,10 @@ public:
 
 // _____________________________________________________________________________
 protected:
-
   void initialise();
 
 // _____________________________________________________________________________
 private:
-
   string fFileName;
   string fWsName;
   string fModelConfigName;
@@ -87,9 +93,7 @@ private:
 
 // _____________________________________________________________________________
 protected:
-
-  // ClassDef(ExtendedModel, 1)
-
+  ClassDef(ExtendedModel, 1)
 };
 
 #endif
