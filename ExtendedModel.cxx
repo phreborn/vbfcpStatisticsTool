@@ -5,9 +5,10 @@
 
 #include "RooRealSumPdf.h"
 #include "RooAddPdf.h"
-#include "RooStarMomentMorph.h"
-#include "RooMultiPdf.h"
+// #include "RooStarMomentMorph.h"
+// #include "RooMultiPdf.h"
 #include "RooGaussian.h"
+#include "RooRealVar.h"
 
 #include "ExtendedModel.hxx"
 #include "utils.hxx"
@@ -234,6 +235,106 @@ void ExtendedModel::fixNuisanceParameters( string fixName )
      par->setConstant(1);
    }
 
+}
+
+// _____________________________________________________________________________
+// Fix a subset of the nuisance parameters at the specified values
+void ExtendedModel::profileParameters( string profileName )
+{
+  vector<string> parsed = parseString(profileName, ",");
+
+  for (size_t i = 0; i < parsed.size(); i++) {
+    TString thisName = parsed[i];
+    TString range;
+    TString boundary;
+    int sign = 0;
+
+    bool useRange    = kFALSE;
+    bool useBoundary = kFALSE;
+
+    // Get ranges
+    if (thisName.Contains("[")) {
+      assert(thisName.Contains("]"));
+      TObjArray* thisNameArray = thisName.Tokenize("[");
+      thisName = ((TObjString*)thisNameArray->At(0))->GetString();
+      range = ((TObjString*)thisNameArray->At(1))->GetString();
+      range.ReplaceAll("]","");
+      assert(range.Contains(":"));
+      useRange = kTRUE;
+    }
+
+    // Get sign
+    if (thisName.Contains("+")) {
+      thisName.ReplaceAll("+",">0");
+    } else if (thisName.Contains("-")) {
+      thisName.ReplaceAll("-","<0");
+    }
+
+    // Get boundaries
+    if (thisName.Contains(">")) {
+      TObjArray* thisNameArray = thisName.Tokenize(">");
+      thisName = ((TObjString*)thisNameArray->At(0))->GetString();
+      boundary = ((TObjString*)thisNameArray->At(1))->GetString();
+      sign = +1;
+      useBoundary = kTRUE;
+    } else if (thisName.Contains("<")) {
+      TObjArray* thisNameArray = thisName.Tokenize("<");
+      thisName = ((TObjString*)thisNameArray->At(0))->GetString();
+      boundary = ((TObjString*)thisNameArray->At(1))->GetString();
+      sign = -1;
+      useBoundary = kTRUE;
+    }
+
+    coutI(ObjectHandling) << "Profiling parameter " << thisName.Data() << endl;
+    RooRealVar* thisPoi = (RooRealVar*)fWorkspace->var(thisName);
+    if (!thisPoi) {
+      coutE(ObjectHandling) << "Parameter " << thisPoi->GetName() << " doesn't exist!" << endl;
+      exit(-1);
+    }
+
+    if (useRange) {
+      double origVal = thisPoi->getVal();
+      TObjArray* rangeArray = range.Tokenize(":");
+      TString s_lo = ((TObjString*)rangeArray->At(0))->GetString();
+      TString s_hi = ((TObjString*)rangeArray->At(1))->GetString();
+      double lo = atof(s_lo.Data());
+      double hi = atof(s_hi.Data());
+      thisPoi->setRange(lo, hi);
+      if ((origVal < lo) || (origVal > hi)) {
+        double newVal = (hi - lo) / 2;
+        thisPoi->setVal(newVal);
+        coutI(ObjectHandling) << "Setting value to " << newVal << endl;
+      }
+    }
+
+    if (useBoundary) {
+      double tmpBoundary = atof(boundary.Data());
+      double origVal = thisPoi->getVal();
+      double forigVal = fabs(thisPoi->getVal());
+      bool boundaryIsZero = AlmostEqualUlpsAndAbs(tmpBoundary, 0.0, 0.0001, 4);
+
+      if (sign > 0) {
+        thisPoi->setMin(tmpBoundary);
+        if (origVal < tmpBoundary) {
+          thisPoi->setVal(tmpBoundary);
+        }
+        if (boundaryIsZero && origVal < 0) {
+          thisPoi->setVal(forigVal);
+        }
+      } else if (sign < 0) {
+        thisPoi->setMax(tmpBoundary);
+        if (origVal > tmpBoundary) {
+          thisPoi->setVal(tmpBoundary);
+        }
+        if (boundaryIsZero && origVal > 0) {
+          thisPoi->setVal(-forigVal);
+        }
+      }
+    }
+
+    thisPoi->setConstant(0);
+    coutI(ObjectHandling) << thisName.Data() << " = " << thisPoi->getVal() << " in [" << thisPoi->getMin() << "," << thisPoi->getMax() << "]" << endl;
+  }
 }
 
 // _____________________________________________________________________________

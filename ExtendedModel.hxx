@@ -54,6 +54,7 @@ public:
   void fixNuisanceParameters();
   void fixNuisanceParameters( string fixName );
   void fixParametersOfInterest();
+  void profileParameters( string profileName );
   void setInitialErrors();
 
 // _____________________________________________________________________________
