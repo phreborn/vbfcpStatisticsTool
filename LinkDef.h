@@ -1,3 +1,4 @@
+#include "utils.hxx"
 #include "ExtendedModel.hxx"
 #include "ExtendedMinimizer.hxx"
 

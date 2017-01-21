@@ -29,11 +29,11 @@ include(${ROOT_USE_FILE})
 include_directories(${PROJECT_INCLUDE_DIRS})
 
 # Generate dictionary
-ROOT_GENERATE_DICTIONARY(G__StatisticsTools ExtendedModel.hxx ExtendedMinimizer.hxx LINKDEF LinkDef.h)
+ROOT_GENERATE_DICTIONARY(G__StatisticsTools utils.hxx ExtendedModel.hxx ExtendedMinimizer.hxx LINKDEF LinkDef.h)
 
 # Shared library with generated dictionary
 set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES} ${YAMLCPP_LIBRARY})
-add_library(StatisticsTools SHARED ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx)
+add_library(StatisticsTools SHARED utils.hxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx)
 target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
 
 # Create a main program using the library

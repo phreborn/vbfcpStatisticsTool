@@ -52,7 +52,7 @@ union MyFloat_t {
   float f;
 };
 
-bool AlmostEqualUlpsAndAbs(float A, float B, float maxDiff, int maxUlpsDiff) {
+inline bool AlmostEqualUlpsAndAbs(float A, float B, float maxDiff, int maxUlpsDiff) {
   // Check if the numbers are really close -- needed  when comparing numbers
   // near zero.
   float absDiff = fabs(A - B);
@@ -74,7 +74,7 @@ bool AlmostEqualUlpsAndAbs(float A, float B, float maxDiff, int maxUlpsDiff) {
 // _____________________________________________________________________________
 // Print used resources
 // Courtesy of Tim Adye <T.J.Adye@rl.ac.uk>.
-void PrintResourcesUsed(const TTime& progStart)
+inline void PrintResourcesUsed(const TTime& progStart)
 {
   ProcInfo_t info;
   if (gSystem->GetProcInfo(&info)<0) return;
@@ -88,7 +88,7 @@ void PrintResourcesUsed(const TTime& progStart)
 
 // _____________________________________________________________________________
 // Split strings according to separator
-vector<string> parseString(string str, string sep)
+inline vector<string> parseString(string str, string sep)
 {
   vector<string> parsed;
   int pos = 0;
@@ -117,7 +117,7 @@ vector<string> parseString(string str, string sep)
 
 // _____________________________________________________________________________
 // Split a RooProdPdf into its components
-void FindUniqueProdComponents( RooProdPdf* Pdf, RooArgSet& Components )
+inline void FindUniqueProdComponents( RooProdPdf* Pdf, RooArgSet& Components )
 {
   static int counter = 0;
   counter++;
