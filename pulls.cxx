@@ -616,34 +616,48 @@ int main(int argc, char** argv)
   fileName << "root-files/" << folder << "/pulls/" << variable << ".root";
   TFile fout(fileName.str().c_str(), "recreate");
 
-  TH1D* h_out = new TH1D(variable.c_str(), variable.c_str(), 3 + 5 * rank_poi_vector.size(), 0, 3 + 5 * rank_poi_vector.size());
+  TTree* resultTree = new TTree("result", "result");
+  resultTree->SetDirectory(0);
 
-  h_out->SetBinContent(1, nuip_hat);
-  h_out->SetBinContent(2, fabs(nuip_errup));
-  h_out->SetBinContent(3, fabs(nuip_errdown));
+  resultTree->Branch("nuisance", &variable);
 
-  h_out->GetXaxis()->SetBinLabel(1, "nuip_hat");
-  h_out->GetXaxis()->SetBinLabel(2, "nuip_up");
-  h_out->GetXaxis()->SetBinLabel(3, "nuip_down");
+  resultTree->Branch("nuis_hat", &nuip_hat);
+  resultTree->Branch("nuis_hi", &nuip_errup);
+  resultTree->Branch("nuis_lo", &nuip_errdown);
+  resultTree->Branch("nuis_prefit", &prefitvariation);
 
-  int bin = 4;
-  for (size_t i = 0; i < rank_poi_vector.size(); i++) {
-    h_out->SetBinContent(bin, pois_hat[i]);
-    h_out->SetBinContent(bin+1, pois_up[i]);
-    h_out->SetBinContent(bin+2, pois_down[i]);
-    h_out->SetBinContent(bin+3, pois_nom_up[i]);
-    h_out->SetBinContent(bin+4, pois_nom_down[i]);
+  vector<double> fill_poi_vals;
+  vector<string> fill_poi_names;
 
-    h_out->GetXaxis()->SetBinLabel(bin, rank_poi_vector[i]->GetName());
-    h_out->GetXaxis()->SetBinLabel(bin+1, "poi_up");
-    h_out->GetXaxis()->SetBinLabel(bin+2, "poi_down");
-    h_out->GetXaxis()->SetBinLabel(bin+3, "poi_nom_up");
-    h_out->GetXaxis()->SetBinLabel(bin+4, "poi_nom_down");
+  for (size_t i = 0; i < rank_poi_vector.size(); ++i) {
+    string thisName = rank_poi_vector[i]->GetName();
 
-    bin += 5;
+    double val_pois_hat = pois_hat[i];
+    double val_pois_up = pois_up[i];
+    double val_pois_down = pois_down[i];
+    double val_pois_nom_up = pois_nom_up[i];
+    double val_pois_nom_down = pois_nom_down[i];
+
+    fill_poi_names.push_back(thisName + "_hat");
+    fill_poi_names.push_back(thisName + "_up");
+    fill_poi_names.push_back(thisName + "_down");
+    fill_poi_names.push_back(thisName + "_up_nom");
+    fill_poi_names.push_back(thisName + "_down_nom");
+
+    fill_poi_vals.push_back(val_pois_hat);
+    fill_poi_vals.push_back(val_pois_up);
+    fill_poi_vals.push_back(val_pois_down);
+    fill_poi_vals.push_back(val_pois_nom_up);
+    fill_poi_vals.push_back(val_pois_nom_down);
   }
 
-  fout.Write();
+  for (size_t i = 0; i < fill_poi_names.size(); ++i) {
+    resultTree->Branch(fill_poi_names[i].c_str(), &fill_poi_vals[i]);
+  }
+
+  resultTree->Fill();
+  resultTree->ResetBranchAddresses();
+  resultTree->Write("",TObject::kOverwrite);
   fout.Close();
 
   PrintResourcesUsed(thistime);
