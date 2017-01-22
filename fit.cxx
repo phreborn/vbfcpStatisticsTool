@@ -95,6 +95,7 @@ int main(int argc, char** argv)
   int numCPU             = 1;
   double precision       = 0.001;
   bool setInitialError   = false;
+  vector<double> scanRange = {};
 
   // Misc settings
   int fixCache           = 1;
@@ -132,6 +133,7 @@ int main(int argc, char** argv)
     ( "optimize"      , po::value<int>( &constOpt )->default_value( constOpt )                     , "Optimize constant terms." )
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                  , "POIs to use." )
     ( "fixAllNP"      , po::value<int>( &fixAllNP )->default_value( fixAllNP )                     , "Fix all NP." )
+    ( "scan"          , po::value<vector<double>> ( &scanRange )->multitoken()                     , "Range for PLR scan od POI.")
     ;
 
   po::variables_map vm0;
@@ -363,6 +365,43 @@ int main(int argc, char** argv)
     ws->loadSnapshot("nominalPois");
 
     ws->writeToFile(filename_with_snapshot.Data());
+  }
+
+  // Perform profile likelihood scans
+  for (auto thisPoi : scan_poi_vector) {
+    TString name = thisPoi->GetName();
+
+    if (scanRange.size() != 3) {
+      break;
+    }
+
+    double lo = scanRange[0];
+    double hi = scanRange[1];
+    int nbins = scanRange[2];
+
+    LOG(logINFO) << "Perform profile likelihood scan of " << name.Data() << " in the range [" << lo << "," << hi << "] in " << nbins << " bins";
+
+    pair<TGraph*, TGraph*> scan = minimizer.createProfile(ws->var(name.Data()), lo, hi, nbins);
+
+    (scan.first)->SetLineColor(kBlack);
+    (scan.first)->SetMarkerColor(kBlack);
+    (scan.second)->SetLineColor(kBlack);
+    (scan.second)->SetMarkerColor(kBlack);
+
+    LOG(logINFO) << "Plotting profile likelihood scan";
+
+    double max = (scan.first)->GetYaxis()->GetXmax();
+    TH2D* h = new TH2D("h", "h", 2, lo, hi, 2, 0, max);
+    h->SetTitle((";" + name + ";-2 log #Lambda " + name).Data());
+
+    TCanvas* c = new TCanvas("c", "c", 800, 800);
+
+    h->Draw();
+    scan.second->Draw("L SAME");
+    scan.first->Draw("P SAME");
+
+    TString scanName = "scan_" + name + ".pdf";
+    c->SaveAs(scanName.Data());
   }
 
   PrintResourcesUsed(thistime);
