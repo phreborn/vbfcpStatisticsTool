@@ -30,3 +30,11 @@ make;
 ~~~~
 ./bin/pulls.exe --input input.root --workspace combined --data asimovData --poi mu --parameter alpha_sys
 ~~~~
+
+# Submitting to lxbatch
+
+## Nuisance impact (correlation)
+
+~~~~
+python submit_pulls.py input.root --workspaceName combined --data asimovData --poi mu --folder ranking
+~~~~
