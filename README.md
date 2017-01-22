@@ -24,3 +24,9 @@ make;
 ~~~~
 ./bin/fit.exe --input input.root --workspace combined --data asimovData --poi mu
 ~~~~
+
+## Nuisance impact (correlation)
+
+~~~~
+./bin/pulls.exe --input input.root --workspace combined --data asimovData --poi mu --parameter alpha_sys
+~~~~

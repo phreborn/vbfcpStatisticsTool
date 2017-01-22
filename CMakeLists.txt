@@ -7,6 +7,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(SOURCE_FILES_FIT fit.cxx)
 set(EXECUTABLE_FIT fit.exe)
 
+set(SOURCE_FILES_PULLS pulls.cxx)
+set(EXECUTABLE_PULLS pulls.exe)
+
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(-std=c++14 COMPILER_SUPPORTS_CXX14)
 if(COMPILER_SUPPORTS_CXX14)
@@ -44,3 +47,6 @@ target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
 # Create a main program using the library
 add_executable(${EXECUTABLE_FIT} ${SOURCE_FILES_FIT})
 target_link_libraries(${EXECUTABLE_FIT} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_PULLS} ${SOURCE_FILES_PULLS})
+target_link_libraries(${EXECUTABLE_PULLS} StatisticsTools ${PROJECT_LIBRARIES})
