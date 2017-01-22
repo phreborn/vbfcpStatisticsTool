@@ -41,6 +41,10 @@
 #include "log.hxx"
 #include "utils.hxx"
 
+#include "atlasstyle-00-03-05/AtlasUtils.h"
+#include "atlasstyle-00-03-05/AtlasLabels.h"
+#include "atlasstyle-00-03-05/AtlasStyle.h"
+
 #include <iomanip>
 #include <stdlib.h>
 #include <list>
@@ -68,6 +72,7 @@ using namespace RooStats;
 int main(int argc, char** argv)
 {
   TTime thistime = gSystem->Now();
+  SetAtlasStyle();
 
   // Model information
   string inFileName      = "path/to/workspace.root";
@@ -390,13 +395,29 @@ int main(int argc, char** argv)
 
     LOG(logINFO) << "Plotting profile likelihood scan";
 
+    TCanvas *c = new TCanvas();
+    c->SetCanvasSize(800, 800);
+
+    gStyle->SetOptStat(0);
+    gStyle->SetOptTitle(0);
+
+    TPad *pad = new TPad("pad", "pad", 0.0, 0.0, 1.0, 1.0, 0, 0, 0);
+    pad->Draw();
+    pad->cd();
+
     double max = (scan.first)->GetYaxis()->GetXmax();
-    TH2D* h = new TH2D("h", "h", 2, lo, hi, 2, 0, max);
-    h->SetTitle((";" + name + ";-2 log #Lambda " + name).Data());
+    TH2F *boundary = new TH2F("boundary", "boundary", 1, lo, hi, 1, 0, max);
 
-    TCanvas* c = new TCanvas("c", "c", 800, 800);
+    boundary->GetXaxis()->SetLabelSize(28);
+    boundary->GetYaxis()->SetLabelSize(28);
 
-    h->Draw();
+    boundary->GetXaxis()->SetTitleSize(28);
+    boundary->GetYaxis()->SetTitleSize(28);
+
+    boundary->GetXaxis()->SetTitle(name.Data());
+    boundary->GetYaxis()->SetTitle("-2 log #Lambda");
+
+    boundary->Draw();
     scan.second->Draw("L SAME");
     scan.first->Draw("P SAME");
 
