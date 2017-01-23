@@ -13,6 +13,9 @@ set(EXECUTABLE_PULLS pulls.exe)
 set(SOURCE_FILES_PLOT_PULLS plot_pulls.cxx)
 set(EXECUTABLE_PLOT_PULLS plot_pulls.exe)
 
+set(SOURCE_FILES_SCAN scan.cxx)
+set(EXECUTABLE_SCAN scan.exe)
+
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(-std=c++14 COMPILER_SUPPORTS_CXX14)
 if(COMPILER_SUPPORTS_CXX14)
@@ -56,3 +59,6 @@ target_link_libraries(${EXECUTABLE_PULLS} StatisticsTools ${PROJECT_LIBRARIES})
 
 add_executable(${EXECUTABLE_PLOT_PULLS} ${SOURCE_FILES_PLOT_PULLS})
 target_link_libraries(${EXECUTABLE_PLOT_PULLS} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_SCAN} ${SOURCE_FILES_SCAN})
+target_link_libraries(${EXECUTABLE_SCAN} StatisticsTools ${PROJECT_LIBRARIES})
