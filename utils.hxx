@@ -10,6 +10,8 @@
 #include "TTime.h"
 #include "TSystem.h"
 #include "TMath.h"
+#include "TAxis.h"
+#include "TGraphAsymmErrors.h"
 
 #include "RooProdPdf.h"
 #include "RooArgSet.h"
@@ -213,6 +215,33 @@ inline TGraph* findIntersection(TGraph &a, TGraph &b)
   }
 
   return interPoint;
+}
+
+// _____________________________________________________________________________
+inline TGraph* makeGraph(string title, int n, double* x_ary, double* y_ary) {
+  TGraph* graph = new TGraph(n, x_ary, y_ary);
+  graph->SetTitle("");
+  graph->GetXaxis()->SetTitle("X");
+  graph->GetYaxis()->SetTitle(title.c_str());
+  return graph;
+}
+
+// _____________________________________________________________________________
+inline TGraphAsymmErrors* makeGraphErr(string title, int n, double* x_ary, double* central, double* errlo, double* errhi) {
+  TGraphAsymmErrors* graph = new TGraphAsymmErrors(n, x_ary, central, NULL, NULL, errlo, errhi);
+  graph->SetTitle("");
+  graph->GetXaxis()->SetTitle("X");
+  graph->GetYaxis()->SetTitle(title.c_str());
+  return graph;
+}
+
+// _____________________________________________________________________________
+inline TGraphAsymmErrors* makeGraphErr(string title, int n, double* x_ary, double* central, double* cenlo, double* cenhi, double* errlo, double* errhi) {
+  TGraphAsymmErrors* graph = new TGraphAsymmErrors(n, x_ary, central, cenlo, cenhi, errlo, errhi);
+  graph->SetTitle("");
+  graph->GetXaxis()->SetTitle("X");
+  graph->GetYaxis()->SetTitle(title.c_str());
+  return graph;
 }
 
 #endif /* _UTILS_ */
