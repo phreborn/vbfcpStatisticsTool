@@ -6,6 +6,8 @@
 #ifndef _UTILS_
 #define _UTILS_
 
+#include <chrono>
+
 #include "TROOT.h"
 #include "TTime.h"
 #include "TSystem.h"
