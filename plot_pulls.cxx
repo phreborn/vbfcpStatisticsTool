@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
   TFile *file = TFile::Open((cardName + "/tmp.root").c_str());
   TTree *tree = (TTree *)(file->Get("result"));
 
-  TTreeFormula *formula_nuis_hat = new TTreeFormula("nuis_hat", "nuis_hat", tree);
+  TTreeFormula *formula_nuis_hat = new TTreeFormula("nuis_hat", "nuis_hat - nuis_nom", tree);
   TTreeFormula *formula_nuis_hi = new TTreeFormula("nuis_hi", "nuis_hi", tree);
   TTreeFormula *formula_nuis_lo = new TTreeFormula("nuis_lo", "nuis_lo", tree);
   TTreeFormula *formula_nuis_prefit = new TTreeFormula("nuis_prefit", "nuis_prefit", tree);
@@ -307,7 +307,7 @@ int main(int argc, char **argv) {
     TFile *file_ol = TFile::Open((overlayCard + "/tmp_ol.root").c_str());
     TTree *tree_ol = (TTree *)(file_ol->Get("result"));
 
-    TTreeFormula *formula_nuis_hat_ol = new TTreeFormula("nuis_hat", "nuis_hat", tree_ol);
+    TTreeFormula *formula_nuis_hat_ol = new TTreeFormula("nuis_hat", "nuis_hat - nuis_nom", tree_ol);
     TTreeFormula *formula_nuis_hi_ol = new TTreeFormula("nuis_hi", "nuis_hi", tree_ol);
     TTreeFormula *formula_nuis_lo_ol = new TTreeFormula("nuis_lo", "nuis_lo", tree_ol);
     TTreeFormula *formula_nuis_prefit_ol = new TTreeFormula("nuis_prefit", "nuis_prefit", tree_ol);
