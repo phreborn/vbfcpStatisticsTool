@@ -410,6 +410,7 @@ int main(int argc, char** argv)
 
   MyTimer timer_prefit_uncertainty;
 
+  double nuip_nom = 0.0;
   double nuip_hat = nuip->getVal();
   double nuip_errup = nuip->getErrorHi(), nuip_errdown = nuip->getErrorLo();
   double prefitvariation = 1.0;
@@ -463,6 +464,9 @@ int main(int argc, char** argv)
         if (nextConstraint->dependsOn(*nextGlobalObservable)) {
           foundGlobalObservable = kTRUE;
 
+          nuip_nom = nextGlobalObservable->getVal();
+          LOG(logINFO) << "Using " << nuip_nom << " as nominal value of the nuisance";
+
           // find constraint width in case of a Gaussian
           if (nextConstraint->IsA() == RooGaussian::Class()) {
             double oldSigmaVal = 1.0;
@@ -494,6 +498,9 @@ int main(int argc, char** argv)
             prefitvariation = 1. / sqrt(tau);
 
             LOG(logINFO) << "Prefit variation is " << prefitvariation;
+
+            nuip_nom = 1.0;
+            LOG(logINFO) << "Assume that " << nuip_nom << " is nominal value of the nuisance";
           }
         }
       }
@@ -628,6 +635,7 @@ int main(int argc, char** argv)
 
   resultTree->Branch("nuisance", &variable);
 
+  resultTree->Branch("nuis_nom", &nuip_nom);
   resultTree->Branch("nuis_hat", &nuip_hat);
   resultTree->Branch("nuis_hi", &nuip_errup);
   resultTree->Branch("nuis_lo", &nuip_errdown);
