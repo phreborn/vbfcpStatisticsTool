@@ -1309,7 +1309,8 @@ int main(int argc, char **argv) {
   TGraphAsymmErrors *gr_poi_nom = makeGraphErr("", 2 * nrNuis, getAry(poi_hat), getAry(points_nuis2), getAry(plot_poi_nom_down_corr), getAry(plot_poi_nom_up_corr), getAry(cenup), getAry(cendown));
   gr_poi_nom->SetLineColor(color_prefit);
   gr_poi_nom->SetFillColor(color_prefit);
-  gr_poi_nom->SetFillStyle(3354);
+  // gr_poi_nom->SetFillStyle(3354);
+  gr_poi_nom->SetFillStyle(0);
   gr_poi_nom->SetLineWidth(1);
   gr_poi_nom->SetMarkerSize(0);
 
@@ -1318,7 +1319,8 @@ int main(int argc, char **argv) {
     gr_poi_nom_ol = makeGraphErr("", 2 * nrNuis_ol, getAry(poi_hat_ol), getAry(points_nuis2_ol), getAry(plot_poi_nom_down_ol_corr), getAry(plot_poi_nom_up_ol_corr), getAry(cenup_ol), getAry(cendown_ol));
     gr_poi_nom_ol->SetLineColor(color_prefit_ol);
     gr_poi_nom_ol->SetFillColor(color_prefit_ol);
-    gr_poi_nom_ol->SetFillStyle(3345);
+    // gr_poi_nom_ol->SetFillStyle(3345);
+    gr_poi_nom_ol->SetFillStyle(0);
     gr_poi_nom_ol->SetLineWidth(1);
     gr_poi_nom_ol->SetMarkerSize(0);
   }
@@ -1326,7 +1328,8 @@ int main(int argc, char **argv) {
   TGraphAsymmErrors *gr_poi_anticorr_nom = makeGraphErr("", 2 * nrNuis, getAry(poi_hat), getAry(points_nuis2), getAry(plot_poi_nom_down_anticorr), getAry(plot_poi_nom_up_anticorr), getAry(cenup), getAry(cendown));
   gr_poi_anticorr_nom->SetLineColor(visualizeCorrelation ? color_prefit_ol : color_prefit);
   gr_poi_anticorr_nom->SetFillColor(visualizeCorrelation ? color_prefit_ol : color_prefit);
-  gr_poi_anticorr_nom->SetFillStyle(3354);
+  // gr_poi_anticorr_nom->SetFillStyle(3354);
+  gr_poi_anticorr_nom->SetFillStyle(0);
   gr_poi_anticorr_nom->SetLineWidth(1);
   gr_poi_anticorr_nom->SetMarkerSize(0);
 
@@ -1335,7 +1338,8 @@ int main(int argc, char **argv) {
     gr_poi_anticorr_nom_ol = makeGraphErr("", 2 * nrNuis_ol, getAry(poi_hat_ol), getAry(points_nuis2_ol), getAry(plot_poi_nom_down_ol_anticorr), getAry(plot_poi_nom_up_ol_anticorr), getAry(cenup_ol), getAry(cendown_ol));
     gr_poi_anticorr_nom_ol->SetLineColor(visualizeCorrelation ? color_prefit : color_prefit_ol);
     gr_poi_anticorr_nom_ol->SetFillColor(visualizeCorrelation ? color_prefit : color_prefit_ol);
-    gr_poi_anticorr_nom_ol->SetFillStyle(3345);
+    // gr_poi_anticorr_nom_ol->SetFillStyle(3345);
+    gr_poi_anticorr_nom_ol->SetFillStyle(0);
     gr_poi_anticorr_nom_ol->SetLineWidth(1);
     gr_poi_anticorr_nom_ol->SetMarkerSize(0);
   }
