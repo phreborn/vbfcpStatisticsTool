@@ -487,6 +487,13 @@ int main(int argc, char** argv)
             }
 
             prefitvariation = oldSigmaVal;
+          } else if (nextConstraint->IsA() == RooPoisson::Class()) {
+            double tau = nextGlobalObservable->getVal();
+            LOG(logINFO) << "Found tau " << tau << " of pdf " << nextConstraint->GetName();
+
+            prefitvariation = 1. / sqrt(tau);
+
+            LOG(logINFO) << "Prefit variation is " << prefitvariation;
           }
         }
       }
