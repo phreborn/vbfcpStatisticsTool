@@ -172,6 +172,11 @@ int main(int argc, char **argv) {
   // - DEBUG
   LOG::ReportingLevel() = LOG::FromString(loglevel);
 
+  if (useRelativeImpact) {
+    LOG(logWARNING) << "Can't use relative impact at the moment. Switch to absolute variation";
+    useRelativeImpact = false;
+  }
+
   // Modifications of inputs
   firstParameter -= 1;
   Color_t color_standardband = TColor::GetColor(hex_color_standardband.c_str());
