@@ -215,6 +215,7 @@ int main(int argc, char **argv) {
   vector<double> poi_nom_up;
   vector<double> poi_nom_down;
   vector<string> labels;
+  map<string, double> prefit_variations_from_file;
 
   system(("hadd -f " + cardName + "/tmp.root " + cardName + "/*.root").c_str());
 
@@ -249,6 +250,7 @@ int main(int argc, char **argv) {
     val.push_back(val_nuis_hat);
     up.push_back(val_nuis_hi);
     down.push_back(val_nuis_lo);
+    prefit_variations_from_file[*label_ptr] = val_nuis_prefit;
 
     double val_poi_hat = 1.0 * formula_poi_hat->EvalInstance();
     double val_poi_up = 1.0 * formula_poi_up->EvalInstance();
@@ -297,6 +299,7 @@ int main(int argc, char **argv) {
   vector<double> poi_nom_up_ol;
   vector<double> poi_nom_down_ol;
   vector<string> labels_ol;
+  map<string, double> prefit_variations_from_file_ol;
 
   if (overlayCard != "") {
     system(("hadd -f " + overlayCard + "/tmp_ol.root " + overlayCard + "/*.root").c_str());
@@ -332,6 +335,7 @@ int main(int argc, char **argv) {
       val_ol.push_back(val_nuis_hat);
       up_ol.push_back(val_nuis_hi);
       down_ol.push_back(val_nuis_lo);
+      prefit_variations_from_file_ol[*label_ptr] = val_nuis_prefit;
 
       double val_poi_hat = 1.0 * formula_poi_hat_ol->EvalInstance();
       double val_poi_up = 1.0 * formula_poi_up_ol->EvalInstance();
@@ -851,7 +855,7 @@ int main(int argc, char **argv) {
   vector<double> cendown_ol;
 
   for (int i = 0; i < nrNuis; i++) {
-    double prefitVariation = 1.0;
+    double prefitVariation = prefit_variations_from_file[labels[i]];
 
     up[i] /= prefitVariation;
     down[i] /= prefitVariation;
@@ -870,7 +874,7 @@ int main(int argc, char **argv) {
   }
 
   for (int i = 0; i < nrNuis_ol; i++) {
-    double prefitVariation = 1.0;
+    double prefitVariation = prefit_variations_from_file_ol[labels[i]];
     boxup_ol.push_back(prefitVariation * scale_theta);
     boxdown_ol.push_back(prefitVariation * scale_theta);
     double height = 0.125;
