@@ -101,6 +101,7 @@ int main(int argc, char** argv)
   double precision       = 0.001;
   bool setInitialError   = false;
   vector<double> scanRange = {};
+  int minosScan          = 0;
 
   // Misc settings
   int fixCache           = 1;
@@ -138,6 +139,7 @@ int main(int argc, char** argv)
     ( "optimize"      , po::value<int>( &constOpt )->default_value( constOpt )                     , "Optimize constant terms." )
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                  , "POIs to use." )
     ( "fixAllNP"      , po::value<int>( &fixAllNP )->default_value( fixAllNP )                     , "Fix all NP." )
+    ( "minos"         , po::value<int>( &minosScan )->default_value( minosScan )                   , "Minos confidence intervals for POI." )
     ( "scan"          , po::value<vector<double>> ( &scanRange )->multitoken()                     , "Range for PLR scan od POI.")
     ;
 
@@ -335,11 +337,27 @@ int main(int argc, char** argv)
 
   MyTimer timer;
   ExtendedMinimizer minimizer("minimizer", pdf, data);
-  minimizer.minimize(Minimizer(minimizerType.c_str(), minimizerAlgo.c_str()),
-                     Strategy(defaultStrategy), ExtendedMinimizer::Eps(eps),
-                     Constrain(*nuis), GlobalObservables(*globs),
-                     NumCPU(numCPU, 3), Offset(offsetting), Optimize(constOpt),
-                     Precision(precision), Hesse(), Save());
+
+  vector<RooCmdArg> opt;
+  opt.push_back(Minimizer(minimizerType.c_str(), minimizerAlgo.c_str()));
+  opt.push_back(Strategy(defaultStrategy));
+  opt.push_back(ExtendedMinimizer::Eps(eps));
+  opt.push_back(Constrain(*nuis));
+  opt.push_back(GlobalObservables(*globs));
+  opt.push_back(NumCPU(numCPU, 3));
+  opt.push_back(Offset(offsetting));
+  opt.push_back(Optimize(constOpt));
+  opt.push_back(Precision(precision));
+  opt.push_back(Hesse());
+  opt.push_back(Save());
+  if (minosScan) opt.push_back(ExtendedMinimizer::Scan(scan_poi_set));
+
+  RooLinkedList* cmdList = new RooLinkedList();
+  for (auto &o : opt) {
+    cmdList->Add((TObject*)&o);
+  }
+
+  minimizer.minimize(*cmdList);
   double time = timer.elapsed();
   LOG(logINFO) << "Fitting time: " << setprecision(9) << time << " seconds";
 
