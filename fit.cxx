@@ -86,7 +86,7 @@ int main(int argc, char** argv)
   string poiName         = "mu";
   string profileName     = "";
   string fixName         = "";
-  int fixAllNP           = 0;
+  bool fixAllNP          = false;
   bool makeParameterSnapshots = false;
 
   // Fit settings
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
   double precision       = 0.001;
   bool setInitialError   = false;
   vector<double> scanRange = {};
-  int minosScan          = 0;
+  bool minosScan          = false;
 
   // Misc settings
   int fixCache           = 1;
@@ -138,10 +138,10 @@ int main(int argc, char** argv)
     ( "offset"        , po::value<int>( &offsetting )->default_value( offsetting )                 , "Offset likelihood." )
     ( "optimize"      , po::value<int>( &constOpt )->default_value( constOpt )                     , "Optimize constant terms." )
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                  , "POIs to use." )
-    ( "fixAllNP"      , po::value<int>( &fixAllNP )->default_value( fixAllNP )                     , "Fix all NP." )
-    ( "minos"         , po::value<int>( &minosScan )->default_value( minosScan )                   , "Minos confidence intervals for POI." )
-    ( "scan"          , po::value<vector<double>> ( &scanRange )->multitoken()                     , "Range for PLR scan od POI.")
-    ( "makeSnapshots" , po::bool_switch(&makeParameterSnapshots)                                   , "Make nominal paramter snapshots.");
+    ( "fixAllNP"      , po::bool_switch( &fixAllNP )                                               , "Fix all NP." )
+    ( "minos"         , po::bool_switch( &minosScan )                                              , "Minos confidence intervals for POI." )
+    ( "scan"          , po::value<vector<double>> ( &scanRange )->multitoken()                     , "Range for PLR scan od POI." )
+    ( "makeSnapshots" , po::bool_switch( &makeParameterSnapshots )                                 , "Make nominal paramter snapshots." )
     ;
 
   po::variables_map vm0;
