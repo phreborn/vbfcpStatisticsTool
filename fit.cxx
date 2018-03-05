@@ -369,7 +369,7 @@ int main(int argc, char** argv)
   RooFitResult* result = (minimizer.GetFitResult());
 
   stringstream filename;
-  filename << "cov_" <<  inFileName;
+  filename <<  inFileName << ".fitresult";
   TFile fout(filename.str().c_str(), "recreate");
   result->Write("", TObject::kOverwrite);
   fout.Close();
