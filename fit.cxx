@@ -87,7 +87,7 @@ int main(int argc, char** argv)
   string profileName     = "";
   string fixName         = "";
   int fixAllNP           = 0;
-  bool makeParameterSnapshots = true;
+  bool makeParameterSnapshots = false;
 
   // Fit settings
   string minimizerType   = "Minuit2";
@@ -141,6 +141,7 @@ int main(int argc, char** argv)
     ( "fixAllNP"      , po::value<int>( &fixAllNP )->default_value( fixAllNP )                     , "Fix all NP." )
     ( "minos"         , po::value<int>( &minosScan )->default_value( minosScan )                   , "Minos confidence intervals for POI." )
     ( "scan"          , po::value<vector<double>> ( &scanRange )->multitoken()                     , "Range for PLR scan od POI.")
+    ( "makeSnapshots" , po::bool_switch(&makeParameterSnapshots)                                   , "Make nominal paramter snapshots.");
     ;
 
   po::variables_map vm0;
