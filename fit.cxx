@@ -101,7 +101,9 @@ int main(int argc, char** argv)
   double precision       = 0.001;
   bool setInitialError   = false;
   vector<double> scanRange = {};
-  bool minosScan          = false;
+  bool minosScan         = false;
+  bool computeZ          = false;
+  double altPOI          = 0.0;
 
   // Misc settings
   int fixCache           = 1;
@@ -142,6 +144,8 @@ int main(int argc, char** argv)
     ( "minos"         , po::bool_switch( &minosScan )                                              , "Minos confidence intervals for POI." )
     ( "scan"          , po::value<vector<double>> ( &scanRange )->multitoken()                     , "Range for PLR scan od POI." )
     ( "makeSnapshots" , po::bool_switch( &makeParameterSnapshots )                                 , "Make nominal paramter snapshots." )
+    ( "significance"  , po::bool_switch( &computeZ )                                               , "Compute significance wrt alternative hypothesis." )
+    ( "alternative"   , po::value<double>( &altPOI )->default_value( altPOI )                      , "POI values for alternative hypothesis." )
     ;
 
   po::variables_map vm0;
@@ -374,6 +378,49 @@ int main(int argc, char** argv)
   result->Write("", TObject::kOverwrite);
   fout.Close();
   LOG(logINFO) << "Saved fitresult as " << filename.str();
+
+  // Compute significance (two-sided)
+  if (computeZ) {
+    for (RooLinkedListIter it = scan_poi_set.iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+      v->setVal(altPOI);
+      v->setConstant(1);
+      LOG(logINFO) << "Fixing POI " << v->GetName() << " to " << altPOI;
+    }
+
+    if (minosScan) cmdList->Remove((TObject*)&opt.back());
+
+    minimizer.minimize(*cmdList);
+
+    double minNllAlt = minimizer.GetMinNll();
+    LOG(logINFO) << "NLL after minimisation for alternative hypothesis: " << setprecision(15) << minNllAlt;
+
+    int ndf = scan_poi_vector.size();
+    double tmu = 2. * (minNllAlt - minNll);
+    double p = TMath::Prob(tmu, ndf);
+    double z = ROOT::Math::gaussian_quantile(1. - p / 2., 1);
+
+    LOG(logINFO) << "Significance: " << setprecision(15) << z << " sigma";
+
+    // Store significance
+    stringstream filenameZ;
+    filenameZ <<  inFileName << ".significance";
+    TFile foutZ(filenameZ.str().c_str(), "recreate");
+
+    TTree* sigTree = new TTree("significance", "significance");
+    sigTree->SetDirectory(0);
+
+    sigTree->Branch("ndf", &ndf);
+    sigTree->Branch("tmu", &tmu);
+    sigTree->Branch("p", &p);
+    sigTree->Branch("z", &z);
+    sigTree->Branch("minNllAlt", &minNllAlt);
+    sigTree->Branch("minNll", &minNll);
+
+    sigTree->Fill();
+    sigTree->ResetBranchAddresses();
+    sigTree->Write("",TObject::kOverwrite);
+    foutZ.Close();
+  }
 
   if (makeParameterSnapshots) {
     TString filename_with_snapshot(inFileName);
