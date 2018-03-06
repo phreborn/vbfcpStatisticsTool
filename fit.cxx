@@ -376,6 +376,37 @@ int main(int argc, char** argv)
   filename <<  inFileName << ".fitresult";
   TFile fout(filename.str().c_str(), "recreate");
   result->Write("", TObject::kOverwrite);
+
+  if (minosScan) {
+    TTree* resultTree = new TTree("result", "result");
+    resultTree->SetDirectory(0);
+    vector<double> fill_poi_vals;
+    vector<string> fill_poi_names;
+
+    for (size_t i = 0; i < scan_poi_vector.size(); ++i) {
+      string thisName = scan_poi_vector[i]->GetName();
+
+      double val_pois_hat = scan_poi_vector[i]->getVal();
+      double val_pois_hi = scan_poi_vector[i]->getErrorHi();
+      double val_pois_lo = scan_poi_vector[i]->getErrorLo();
+
+      fill_poi_names.push_back(thisName + "_hat");
+      fill_poi_names.push_back(thisName + "_hi");
+      fill_poi_names.push_back(thisName + "_lo");
+
+      fill_poi_vals.push_back(val_pois_hat);
+      fill_poi_vals.push_back(val_pois_hi);
+      fill_poi_vals.push_back(val_pois_lo);
+    }
+
+    for (size_t i = 0; i < fill_poi_names.size(); ++i) {
+      resultTree->Branch(fill_poi_names[i].c_str(), &fill_poi_vals[i]);
+    }
+
+    resultTree->Fill();
+    resultTree->ResetBranchAddresses();
+    resultTree->Write("",TObject::kOverwrite);
+  }
   fout.Close();
   LOG(logINFO) << "Saved fitresult as " << filename.str();
 
