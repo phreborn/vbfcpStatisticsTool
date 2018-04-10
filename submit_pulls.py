@@ -26,8 +26,6 @@ def parse_args(argv):
     p.add_argument("--dataName", type=str, default="combData", help="Name of the dataset.")
     p.add_argument("--poi", type=str, default="mu", help="Name of the POI.")
     p.add_argument("--snapshotName", type=str, default="ucmles", help="Name of the snapshot from which all fits start.")
-    p.add_argument("--binnedEval", help="Activate binned likelihood evaluation.", action="store_true")
-    p.add_argument("--numCPU", type=str, default="1", help="Number of CPUs used in the minimisation.")
     p.add_argument("--loglevel", type=str, default="INFO", help="Control the printout.")
     p.add_argument("--profile", type=str, default="", help="Parameters that should be profiled.")
     p.add_argument("--fix", type=str, default="", help="Parameters that should be fixed.")
@@ -46,8 +44,6 @@ def parse_args(argv):
     config["ModelConfigName"] = args.ModelConfigName
     config["dataName"] = args.dataName
     config["poi"] = args.poi
-    config["binnedEval"] = args.binnedEval
-    config["numCPU"] = args.numCPU
     config["snapshotName"] = args.snapshotName
     config["loglevel"] = args.loglevel
     config["profile"] = args.profile
@@ -72,8 +68,6 @@ def main(argv):
     ModelConfigName = config["ModelConfigName"]
     dataName = config["dataName"]
     poi = config["poi"]
-    binnedEval = config["binnedEval"]
-    numCPU = config["numCPU"]
     snapshotName = config["snapshotName"]
     loglevel = config["loglevel"]
     profile = config["profile"]
@@ -210,7 +204,7 @@ stagein()
     setupATLAS
 
     # LCG environment
-    lsetup "lcgenv -p LCG_86 x86_64-slc6-gcc62-opt ROOT";
+    lsetup "lcgenv -p LCG_88 x86_64-slc6-gcc62-opt ROOT";
 
     cd %s;
 }
@@ -225,7 +219,7 @@ runcode()
 
 stageout()
 {
-  cd ${OUTDIR}; ls -l
+    cd ${OUTDIR}; ls -l
 }
 
 stagein
