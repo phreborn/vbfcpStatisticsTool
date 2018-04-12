@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import argparse
+import ctypes
 import os
 import subprocess
 import sys
@@ -9,6 +10,21 @@ import itertools
 
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+
+
+try:
+    if os.path.isfile("lib/libStatisticsTools.so"):
+        path = "lib/libStatisticsTools.so"
+    elif os.path.isfile("lib/libStatisticsTools.dylib"):
+        path = "lib/libStatisticsTools.dylib"
+
+    ROOT.gSystem.Load(path)
+    tools = ctypes.cdll.LoadLibrary(path)
+    prototype = ctypes.CFUNCTYPE(ctypes.c_void_p)
+    loadCustom = prototype(('loadCustom', tools))
+    loadCustom()
+except Exception:
+    print("Could not load shared library. Make sure that it was compiled.")
 
 
 __author__ = "Stefan Gadatsch"
@@ -91,6 +107,10 @@ def main(argv):
     os.system("mkdir -vp root-files/%s/scan" % folder)
 
     home_folder = os.getcwd()
+
+    ROOT.loadCustom()
+
+    sys.exit(-1)
 
     ranges = scanRange.split(',')
     allbins = bins.split(',')
