@@ -210,7 +210,7 @@ int main(int argc, char** argv)
   RooArgSet* pois = model->GetParametersOfInterest();
   RooArgSet* obs = model->GetObservables();
 
-  system(("mkdir -vp root-files/" + folder).c_str());
+  std::system(("mkdir -vp root-files/" + folder).c_str());
 
   if (fixAllNP) {
     model->fixNuisanceParameters();

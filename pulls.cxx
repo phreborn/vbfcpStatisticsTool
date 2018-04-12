@@ -198,7 +198,7 @@ int main(int argc, char** argv)
   RooArgSet* pois = model->GetParametersOfInterest();
   RooArgSet* obs = model->GetObservables();
 
-  system(("mkdir -vp root-files/" + folder + "/pulls").c_str());
+  std::system(("mkdir -vp root-files/" + folder + "/pulls").c_str());
 
   // Fix nuisance parameters at initial values
   if (fixName != "") {

@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
   vector<string> labels;
   map<string, double> prefit_variations_from_file;
 
-  system(("hadd -f " + cardName + "/tmp.root " + cardName + "/*.root").c_str());
+  std::system(("hadd -f " + cardName + "/tmp.root " + cardName + "/*.root").c_str());
 
   TFile *file = TFile::Open((cardName + "/tmp.root").c_str());
   TTree *tree = (TTree *)(file->Get("result"));
@@ -302,7 +302,7 @@ int main(int argc, char **argv) {
   map<string, double> prefit_variations_from_file_ol;
 
   if (overlayCard != "") {
-    system(("hadd -f " + overlayCard + "/tmp_ol.root " + overlayCard + "/*.root").c_str());
+    std::system(("hadd -f " + overlayCard + "/tmp_ol.root " + overlayCard + "/*.root").c_str());
 
     TFile *file_ol = TFile::Open((overlayCard + "/tmp_ol.root").c_str());
     TTree *tree_ol = (TTree *)(file_ol->Get("result"));
@@ -1536,7 +1536,7 @@ int main(int argc, char **argv) {
   label_tex_2.DrawLatex(position_label_x, position_label_y - 2 * position_label_delta_y, ranklabel.str().c_str());
 
   // Cleanup
-  system(("rm -f " + cardName + "/tmp.root").c_str());
+  std::system(("rm -f " + cardName + "/tmp.root").c_str());
 
   // Save the plot
   stringstream baseName;
@@ -1544,7 +1544,7 @@ int main(int argc, char **argv) {
   baseName << "ranking_" << poiname << "_rank_" << setfill('0') << setw(4) << firstParameter + 1 << "_to_" << setfill('0') << setw(4) << firstParameter + showTopParameters;
 
   string type = "pdf";
-  system(("mkdir -vp " + type + "-files").c_str());
+  std::system(("mkdir -vp " + type + "-files").c_str());
 
   stringstream saveName;
   saveName << type << "-files/" << baseName.str() << "." << type;
