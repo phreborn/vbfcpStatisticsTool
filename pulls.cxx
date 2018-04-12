@@ -70,6 +70,9 @@ int main(int argc, char** argv)
 {
   TTime thistime = gSystem->Now();
 
+  // Load custom classes
+  loadCustom();
+
   // Model information
   string inFileName      = "path/to/workspace.root";
   string wsName          = "combined";

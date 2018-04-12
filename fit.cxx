@@ -72,6 +72,11 @@ using namespace RooStats;
 int main(int argc, char** argv)
 {
   TTime thistime = gSystem->Now();
+
+  // Load custom classes
+  loadCustom();
+
+  // ATLAS style
   SetAtlasStyle();
 
   // Model information
