@@ -50,7 +50,7 @@ ROOT_GENERATE_DICTIONARY(G__StatisticsTools utils.hxx ExtendedModel.hxx Extended
 
 # Shared library with generated dictionary
 set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES} ${YAMLCPP_LIBRARY})
-add_library(StatisticsTools SHARED utils.hxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx ${sources})
+add_library(StatisticsTools SHARED utils.cxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx ${sources})
 target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
 
 # Create a main program using the library
