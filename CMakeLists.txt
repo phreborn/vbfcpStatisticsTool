@@ -32,6 +32,9 @@ else()
   message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler.")
 endif()
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
+
 # CERN ROOT
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT REQUIRED COMPONENTS Core Gpad Hist HistFactory MathCore Matrix Minuit Net Physics RIO Rint RooFit RooFitCore RooStats TMVA Thread Tree TreePlayer)
