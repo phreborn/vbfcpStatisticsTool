@@ -110,21 +110,27 @@ def main(argv):
         print(varName)
 
         if "gamma_stat" in varName:
+            var = niter.Next()
             continue
 
         if varName.startswith('scale_'):
+            var = niter.Next()
             continue
 
         if varName.startswith('unconst_'):
+            var = niter.Next()
             continue
 
         if varName.startswith('u_'):
+            var = niter.Next()
             continue
 
         if varName.endswith('_COMB'):
+            var = niter.Next()
             continue
 
         if varName in fix:
+            var = niter.Next()
             continue
 
         submitJob(parameter=varName, folder=folder, workspace=workspace, poi=poi, workspaceName=workspaceName, ModelConfigName=ModelConfigName, dataName=dataName, snapshotName=snapshotName, loglevel=loglevel, profile=profile, strategy=strategy, fix=fix, eps=eps, precision=precision, home_folder=home_folder, queue=queue)
