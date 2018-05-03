@@ -39,6 +39,7 @@ TGraph* findIntersection(TGraph &a, TGraph &b);
 TGraph* makeGraph(string title, int n, double* x_ary, double* y_ary);
 TGraphAsymmErrors* makeGraphErr(string title, int n, double* x_ary, double* central, double* errlo, double* errhi);
 TGraphAsymmErrors* makeGraphErr(string title, int n, double* x_ary, double* central, double* cenlo, double* cenhi, double* errlo, double* errhi);
+double subtract_error(double err12, double err1);
 
 // _____________________________________________________________________________
 // Timer for benchmarks, see

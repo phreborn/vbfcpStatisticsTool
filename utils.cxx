@@ -232,3 +232,14 @@ TGraphAsymmErrors* makeGraphErr(string title, int n, double* x_ary, double* cent
   graph->GetYaxis()->SetTitle(title.c_str());
   return graph;
 }
+
+// _____________________________________________________________________________
+double subtract_error(double err12, double err1) {
+  double q = (err12 * err12 - err1 * err1);
+  if (q >= 0.0) {
+    return sqrt(err12 * err12 - err1 * err1);
+  } else {
+    LOG(logWARNING) << "Please check: q=" << q;
+    return 1e-09;
+  }
+}
