@@ -40,6 +40,11 @@ TGraph* makeGraph(string title, int n, double* x_ary, double* y_ary);
 TGraphAsymmErrors* makeGraphErr(string title, int n, double* x_ary, double* central, double* errlo, double* errhi);
 TGraphAsymmErrors* makeGraphErr(string title, int n, double* x_ary, double* central, double* cenlo, double* cenhi, double* errlo, double* errhi);
 double subtract_error(double err12, double err1);
+pair< double, double > PDGrounding( double value, double error, int additionalDigit );
+int GetThreeDigits( double error );
+int GetNSigDigits( int threeDigits );
+double frexp10( double x, int* exp );
+double FormatValue( double value, int exponent, int nDigits, int extraRound );
 
 // _____________________________________________________________________________
 // Timer for benchmarks, see

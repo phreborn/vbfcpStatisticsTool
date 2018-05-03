@@ -243,3 +243,98 @@ double subtract_error(double err12, double err1) {
     return 1e-09;
   }
 }
+
+// _____________________________________________________________________________
+// Given a value and an error, round and format them according to the PDG rules
+// for significant digits
+pair< double, double > PDGrounding( double value, double error, int additionalDigit )
+{
+  int threeDigits = GetThreeDigits(error);
+  int nSignificantDigits = GetNSigDigits(threeDigits);
+  nSignificantDigits += additionalDigit;
+
+  // extraRound is meant for the special case of threeDigits > 950
+  int extraRound;
+  if (threeDigits >= 950) extraRound = 1;
+  else extraRound = 0;
+
+  // Convert to mantissa + exponent representation
+  int expVal, expErr;
+  frexp10(value, &expVal);
+  frexp10(error, &expErr);
+
+  // Format the value and error
+  double formVal = FormatValue(value, expVal, expVal-expErr+nSignificantDigits, extraRound);
+  double formErr = FormatValue(error, expErr, nSignificantDigits, extraRound);
+
+  return make_pair(formVal, formErr);
+}
+
+// _____________________________________________________________________________
+// Get three digits
+int GetThreeDigits( double error )
+{
+  // Extract the three most significant digits and return them as an integer
+  ostringstream stream;
+  stream << Form("%.2e", error);
+  TString str(stream.str());
+  str = ((TObjString*)(str.Tokenize("e"))->At(0))->GetString();
+  str.ReplaceAll(".", "");
+  str.ReplaceAll("+", "");
+  str.ReplaceAll("-", "");
+
+  int threeDigits = atoi(str.Data());
+
+  return threeDigits;
+}
+
+// _____________________________________________________________________________
+// Get the number of significant digits
+int GetNSigDigits( int threeDigits )
+{
+  // Find the number of significant digits
+  assert(threeDigits < 1000);
+  int nSignificantDigits;
+  if (threeDigits < 101) nSignificantDigits = 2;
+  else if (threeDigits < 356) nSignificantDigits = 2;
+  else if (threeDigits < 950) nSignificantDigits = 1;
+  else nSignificantDigits = 2;
+
+  return nSignificantDigits;
+}
+
+// _____________________________________________________________________________
+// Convert a number to mantissa + exponent representation in base 10
+double frexp10( double x, int* exp )
+{
+  double mantissa = .0 > x ? - x : x;
+  *exp = 0;
+
+  if (mantissa >= 10.) {
+    *exp = 1;
+    for (; !((mantissa /= 10.) < 10.); ++(*exp));
+  } else if (!(mantissa > 1.)) {
+    *exp = -1;
+    for (; !((mantissa *= 10.) > 1.); --(*exp));
+  }
+
+  return mantissa;
+}
+
+// _____________________________________________________________________________
+// Format a value correctly and remove not needed digits
+double FormatValue( double value, int exponent, int nDigits, int extraRound )
+{
+  int roundAt = nDigits - 1 - exponent - extraRound;
+  int nDec;
+  if (exponent < nDigits) nDec = roundAt;
+  else nDec = 0;
+
+  ostringstream stream;
+  stream << "%." << nDec << "f";
+
+  double tmp = pow(10, roundAt);
+  double formVal = atof(Form(stream.str().c_str(), round(value * tmp) / tmp));
+
+  return formVal;
+}
