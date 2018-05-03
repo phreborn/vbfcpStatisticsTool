@@ -23,6 +23,9 @@ set(EXECUTABLE_SCAN scan.exe)
 set(SOURCE_FILES_PLOT_SCAN plot_scan.cxx)
 set(EXECUTABLE_PLOT_SCAN plot_scan.exe)
 
+set(SOURCE_FILES_BREAKDOWN breakdown.cxx)
+set(EXECUTABLE_BREAKDOWN breakdown.exe)
+
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(-std=c++14 COMPILER_SUPPORTS_CXX14)
 if(COMPILER_SUPPORTS_CXX14)
@@ -35,12 +38,18 @@ endif()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
 
+# Additional modules
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
+
 # CERN ROOT
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT REQUIRED COMPONENTS Core Gpad Hist HistFactory MathCore Matrix Minuit Net Physics RIO Rint RooFit RooFitCore RooStats TMVA Thread Tree TreePlayer)
 
 # BOOST
 find_package(Boost 1.60 COMPONENTS REQUIRED program_options log log_setup system filesystem date_time thread chrono)
+
+# YAML
+find_package(YamlCpp REQUIRED)
 
 # Includes
 set(PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIR})
@@ -75,3 +84,6 @@ target_link_libraries(${EXECUTABLE_SCAN} StatisticsTools ${PROJECT_LIBRARIES})
 
 add_executable(${EXECUTABLE_PLOT_SCAN} ${SOURCE_FILES_PLOT_SCAN})
 target_link_libraries(${EXECUTABLE_PLOT_SCAN} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_BREAKDOWN} ${SOURCE_FILES_BREAKDOWN})
+target_link_libraries(${EXECUTABLE_BREAKDOWN} StatisticsTools ${PROJECT_LIBRARIES})
