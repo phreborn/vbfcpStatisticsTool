@@ -248,31 +248,47 @@ int ExtendedMinimizer::minimize( const RooLinkedList& cmdList )
   }
 
   createMinimizer();
-  int status = robustMinimize();
+  int status = 0;
 
-  // Evaluate errors with Hesse
-  if (fHesse) {
-    fMinimizer->hesse();
+  bool perform_minimization = false;
+  RooArgSet* attached_set = fNll->getVariables();
+
+  for (RooLinkedListIter it = attached_set->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+    if (!v->isConstant()) {
+      perform_minimization = true;
+      break;
+    }
   }
 
-  // Obtain Hessian matrix either from patched Minuit or after inversion
-  // TMatrixDSym G = Minuit2::MnHesse::lastHessian();
-  TMatrixDSym G = ((TMatrixDSym)fMinimizer->lastMinuitFit()->covarianceMatrix()).Invert();
-  int n = G.GetNrows();
-  fHesseMatrix.ResizeTo(n,n);
-  fHesseMatrix = G;
+  if (!perform_minimization) {
+    coutW(ObjectHandling) << "ExtendedMinimizer::minimize(" << fName << ") no floating parameters found -- skipping minimization" << endl;
+  } else {
+    status = robustMinimize();
 
-  // Eigenvalue and eigenvector analysis
-  if (fEigen) {
-    eigenAnalysis();
-  }
+    // Evaluate errors with Hesse
+    if (fHesse) {
+      fMinimizer->hesse();
+    }
 
-  // Evaluate errors with Minos
-  if (fMinos) {
-    if (fMinosSet) {
-      fMinimizer->minos(*fMinosSet);
-    } else {
-      fMinimizer->minos();
+    // Obtain Hessian matrix either from patched Minuit or after inversion
+    // TMatrixDSym G = Minuit2::MnHesse::lastHessian();
+    TMatrixDSym G = ((TMatrixDSym)fMinimizer->lastMinuitFit()->covarianceMatrix()).Invert();
+    int n = G.GetNrows();
+    fHesseMatrix.ResizeTo(n,n);
+    fHesseMatrix = G;
+
+    // Eigenvalue and eigenvector analysis
+    if (fEigen) {
+      eigenAnalysis();
+    }
+
+    // Evaluate errors with Minos
+    if (fMinos) {
+      if (fMinosSet) {
+        fMinimizer->minos(*fMinosSet);
+      } else {
+        fMinimizer->minos();
+      }
     }
   }
 
