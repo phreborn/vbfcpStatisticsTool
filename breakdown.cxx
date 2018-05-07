@@ -626,6 +626,8 @@ int main(int argc, char** argv)
   double sys_nomc_err_hi = subtract_error(sys_err_hi, mc_stat_err_hi);
   double sys_nomc_err_lo = subtract_error(sys_err_lo, mc_stat_err_lo);
 
+  string hi, lo;
+
   set<string> set_sysNames;
   if (doIndividual) {
     TextTable t('-', '|', '+');
@@ -639,8 +641,12 @@ int main(int argc, char** argv)
       string name = it.second;
 
       t.add(name);
-      t.add(signs_up[name] + to_string(ind_err_hi[name]));
-      t.add(signs_down[name] + to_string(ind_err_lo[name]));
+      hi = to_string(ind_err_hi[name]);
+      lo = to_string(ind_err_lo[name]);
+      hi.erase(hi.find_last_not_of('0') + 1, std::string::npos);
+      lo.erase(lo.find_last_not_of('0') + 1, std::string::npos);
+      t.add(signs_up[name] + hi);
+      t.add(signs_down[name] + lo);
       t.endOfRow();
 
       set_sysNames.insert(name);
@@ -662,8 +668,12 @@ int main(int argc, char** argv)
     string name = it.second;
 
     t_stat.add(name);
-    t_stat.add("+" + to_string(cr_err_hi[name]));
-    t_stat.add("-" + to_string(cr_err_lo[name]));
+    hi = to_string(cr_err_hi[name]);
+    lo = to_string(cr_err_lo[name]);
+    hi.erase(hi.find_last_not_of('0') + 1, std::string::npos);
+    lo.erase(lo.find_last_not_of('0') + 1, std::string::npos);
+    t_stat.add("+" + hi);
+    t_stat.add("-" + lo);
     t_stat.endOfRow();
 
     set_sysNames.insert(name);
@@ -696,38 +706,70 @@ int main(int argc, char** argv)
   t_breakdown.endOfRow();
 
   t_breakdown.add("total");
-  t_breakdown.add("+" + to_string(PDGrounding(mle, err_hi, 1).second));
-  t_breakdown.add(      to_string(PDGrounding(mle, err_lo, 1).second));
+  hi = to_string(PDGrounding(mle, err_hi, 1).second);
+  lo = to_string(PDGrounding(mle, err_lo, 1).second);
+  hi.erase(hi.find_last_not_of('0') + 1, std::string::npos);
+  lo.erase(lo.find_last_not_of('0') + 1, std::string::npos);
+  t_breakdown.add("+" + hi);
+  t_breakdown.add(      lo);
   t_breakdown.endOfRow();
 
   t_breakdown.add("data statistics");
-  t_breakdown.add("+" + to_string(PDGrounding(mle, stat_err_hi, 1).second));
-  t_breakdown.add(      to_string(PDGrounding(mle, stat_err_lo, 1).second));
+  hi = to_string(PDGrounding(mle, stat_err_hi, 1).second);
+  lo = to_string(PDGrounding(mle, stat_err_lo, 1).second);
+  hi.erase(hi.find_last_not_of('0') + 1, std::string::npos);
+  lo.erase(lo.find_last_not_of('0') + 1, std::string::npos);
+  t_breakdown.add("+" + hi);
+  t_breakdown.add(      lo);
   t_breakdown.endOfRow();
 
   t_breakdown.add("template statistics");
-  t_breakdown.add("+" + to_string(PDGrounding(mle, mc_stat_err_hi, 1).second));
-  t_breakdown.add(      to_string(PDGrounding(mle, mc_stat_err_lo, 1).second));
+  hi = to_string(PDGrounding(mle, mc_stat_err_hi, 1).second);
+  lo = to_string(PDGrounding(mle, mc_stat_err_lo, 1).second);
+  hi.erase(hi.find_last_not_of('0') + 1, std::string::npos);
+  lo.erase(lo.find_last_not_of('0') + 1, std::string::npos);
+  t_breakdown.add("+" + hi);
+  t_breakdown.add(      lo);
   t_breakdown.endOfRow();
 
   t_breakdown.add("systematics");
-  t_breakdown.add("+" + to_string(PDGrounding(mle, sys_err_hi, 1).second));
-  t_breakdown.add(      to_string(PDGrounding(mle, sys_err_lo, 1).second));
+  hi = to_string(PDGrounding(mle, sys_err_hi, 1).second);
+  lo = to_string(PDGrounding(mle, sys_err_lo, 1).second);
+  hi.erase(hi.find_last_not_of('0') + 1, std::string::npos);
+  lo.erase(lo.find_last_not_of('0') + 1, std::string::npos);
+  t_breakdown.add("+" + hi);
+  t_breakdown.add(      lo);
   t_breakdown.endOfRow();
 
   t_breakdown.add("systematics w/o template statistics");
-  t_breakdown.add("+" + to_string(PDGrounding(mle, sys_nomc_err_hi, 1).second));
-  t_breakdown.add(      to_string(PDGrounding(mle, sys_nomc_err_lo, 1).second));
+  hi = to_string(PDGrounding(mle, sys_nomc_err_hi, 1).second);
+  lo = to_string(PDGrounding(mle, sys_nomc_err_lo, 1).second);
+  hi.erase(hi.find_last_not_of('0') + 1, std::string::npos);
+  lo.erase(lo.find_last_not_of('0') + 1, std::string::npos);
+  t_breakdown.add("+" + hi);
+  t_breakdown.add(      lo);
   t_breakdown.endOfRow();
 
-  // for (auto class_itr : nuisance_assignments) {
-  //   string nuisance_class = class_itr.first;
+  for (auto class_itr : nuisance_assignments) {
+    string nuisance_class = class_itr.first;
   
-  //   t_breakdown.add(nuisance_class);
-  //   t_breakdown.add("+" + to_string(PDGrounding(mle, all_err_hi_comp[nuisance_class], 1).second));
-  //   t_breakdown.add(      to_string(PDGrounding(mle, all_err_lo_comp[nuisance_class], 1).second));
-  //   t_breakdown.endOfRow();
-  // }
+    if (nuisance_class == "Normalisation") {
+      continue;
+    }
+
+    if (nuisance_class == "TemplateStatistics") {
+      continue;
+    }
+
+    t_breakdown.add(nuisance_class);
+    hi = to_string(PDGrounding(mle, all_err_hi_comp[nuisance_class], 1).second);
+    lo = to_string(PDGrounding(mle, all_err_lo_comp[nuisance_class], 1).second);
+    hi.erase(hi.find_last_not_of('0') + 1, std::string::npos);
+    lo.erase(lo.find_last_not_of('0') + 1, std::string::npos);
+    t_breakdown.add("+" + hi);
+    t_breakdown.add(      lo);
+    t_breakdown.endOfRow();
+  }
 
   t_breakdown.setAlignment(1, TextTable::Alignment::RIGHT);
   t_breakdown.setAlignment(2, TextTable::Alignment::RIGHT);
