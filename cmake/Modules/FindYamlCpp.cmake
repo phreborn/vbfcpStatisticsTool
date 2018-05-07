@@ -38,6 +38,7 @@ find_path(YAMLCPP_INCLUDE_DIR
   ${PROJECT_SOURCE_DIR}/../../yaml-cpp/include
   ~/Library/Frameworks/yaml-cpp/include/
   /Library/Frameworks/yaml-cpp/include/
+  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/${$LCGPLAT}/include/
   /sw/yaml-cpp/         # Fink
   /opt/local/yaml-cpp/  # DarwinPorts
   /opt/csw/yaml-cpp/    # Blastwave
@@ -56,6 +57,7 @@ find_library(YAMLCPP_LIBRARY_RELEASE
   ${PROJECT_SOURCE_DIR}/../external/yaml-cpp/build
   ~/Library/Frameworks
   /Library/Frameworks
+  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/${$LCGPLAT}/lib/
   /sw
   /opt/local
   /opt/csw
@@ -74,6 +76,7 @@ find_library(YAMLCPP_LIBRARY_DEBUG
   ${PROJECT_SOURCE_DIR}/../external/yaml-cpp/build
   ~/Library/Frameworks
   /Library/Frameworks
+  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/${$LCGPLAT}/lib/
   /sw
   /opt/local
   /opt/csw
