@@ -220,13 +220,14 @@ stagein()
     ls -l
 
     # ATLAS environment
+    source /cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/user/atlasLocalSetup.sh
     export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase;
     echo ${ATLAS_LOCAL_ROOT_BASE}
     alias setupATLAS='source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh';
     setupATLAS
 
     # LCG environment
-    lsetup "lcgenv -p LCG_88 x86_64-slc6-gcc62-opt ROOT";
+    lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT";
 
     cd %s;
 }

@@ -425,7 +425,7 @@ int main(int argc, char** argv)
     // retrieve from cache
     const RooArgSet* constr = ws->set(Form("CACHE_CONSTR_OF_PDF_%s_FOR_OBS_%s", pdf->GetName(), RooNameSet(*data->get()).content()));
     AllConstraints->add(*constr);
-    delete constr;
+    // delete constr;
   } else {
     // Load information needed to determine attributes from ModelConfig
     RooAbsPdf* tmpPdf = (RooAbsPdf*)mc->GetPdf();

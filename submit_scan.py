@@ -108,9 +108,9 @@ def main(argv):
 
     home_folder = os.getcwd()
 
-    ROOT.loadCustom()
+    #  ROOT.loadCustom()
 
-    sys.exit(-1)
+    #  sys.exit(-1)
 
     ranges = scanRange.split(',')
     allbins = bins.split(',')
@@ -268,7 +268,8 @@ stagein()
     setupATLAS
 
     # LCG environment
-    lsetup "lcgenv -p LCG_88 x86_64-slc6-gcc62-opt ROOT";
+    #  lsetup "lcgenv -p LCG_88 x86_64-slc6-gcc62-opt ROOT";
+    lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT";
 
     cd %s;
 }
