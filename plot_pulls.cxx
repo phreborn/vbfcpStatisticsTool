@@ -73,6 +73,8 @@
 #include "boost/program_options/parsers.hpp"
 #include "boost/program_options/variables_map.hpp"
 
+#include "yaml-cpp/yaml.h"
+
 using namespace std;
 using namespace RooFit;
 using namespace RooStats;
@@ -89,6 +91,7 @@ int main(int argc, char **argv) {
   string cardName = "";
   string overlayCard = "";
   string poiname = "mu";
+  string names = "";
 
   int firstParameter = 1;
   int showTopParameters = -1;
@@ -138,6 +141,7 @@ int main(int argc, char **argv) {
     ( "onesided"      , po::value<bool>( &showOneSided )->default_value( showOneSided )                   , "Show one sided variations." )
     ( "rank"          , po::value<bool>( &rankNuis )->default_value( rankNuis )                           , "Order nuisances by impact." )
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                         , "POIs to use." )
+    ( "map"           , po::value<string>( &names )->default_value( names )                  , "Path to nice parameter names." )
     ;
 
   po::variables_map vm0;
@@ -204,6 +208,20 @@ int main(int argc, char **argv) {
   pad1->Draw();
   pad1->cd();
 
+  // Load the naming file
+  map<string, string> map_name;
+  if (names != "") {
+    LOG(logINFO) << "Load naming from " << names;
+    YAML::Node parnames = YAML::LoadFile(names);
+
+    for (const auto node : parnames) {
+      YAML::Node a = node.first;
+      YAML::Node b = node.second;
+
+      map_name[a.as<string>()] = b.as<string>();
+    }
+  }
+
   // Run the actual plotting
   vector<double> points_nuis;
   vector<double> val;
@@ -264,7 +282,13 @@ int main(int argc, char **argv) {
     poi_nom_up.push_back(val_poi_nom_up);
     poi_nom_down.push_back(val_poi_nom_down);
 
-    labels.push_back(*label_ptr);
+    string label = *label_ptr;
+
+    if ( map_name.find(label) != map_name.end() ) {
+      label = map_name[label];
+    }
+
+    labels.push_back(label);
   }
 
   int nrNuis = points_nuis.size();
@@ -349,7 +373,13 @@ int main(int argc, char **argv) {
       poi_nom_up_ol.push_back(val_poi_nom_up);
       poi_nom_down_ol.push_back(val_poi_nom_down);
 
-      labels_ol.push_back(*label_ptr);
+      string label = *label_ptr;
+
+      if ( map_name.find(label) != map_name.end() ) {
+        label = map_name[label];
+      }
+
+      labels_ol.push_back(label);
     }
   }
 
