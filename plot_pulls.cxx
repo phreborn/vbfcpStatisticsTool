@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
   TPad *pad1 = new TPad("pad1", "pad1", 0.0, 0.0, 1.0, 1.0, 0);
 
   if (drawParamNames) {
-    pad1->SetLeftMargin(0.35);
+    pad1->SetLeftMargin(0.4);
   } else {
     pad1->SetLeftMargin(0.05);
   }
@@ -284,9 +284,9 @@ int main(int argc, char **argv) {
 
     string label = *label_ptr;
 
-    if ( map_name.find(label) != map_name.end() ) {
-      label = map_name[label];
-    }
+    // if ( map_name.find(label) != map_name.end() ) {
+    //   label = map_name[label];
+    // }
 
     labels.push_back(label);
   }
@@ -375,9 +375,9 @@ int main(int argc, char **argv) {
 
       string label = *label_ptr;
 
-      if ( map_name.find(label) != map_name.end() ) {
-        label = map_name[label];
-      }
+      // if ( map_name.find(label) != map_name.end() ) {
+      //   label = map_name[label];
+      // }
 
       labels_ol.push_back(label);
     }
@@ -1399,8 +1399,15 @@ int main(int argc, char **argv) {
 
   // histogram to get the nuisance parameter labels correct
   TH2F *h = new TH2F("h", "", 1, border_lo, border_hi, nrNuis + offset + 1, -offset, nrNuis + 1);
-  for (int i = offset; i < nrNuis + offset; i++)
-    h->GetYaxis()->SetBinLabel(i + 1, drawParamNames ? labels[i - offset].c_str() : "");
+  
+  for (int i = offset; i < nrNuis + offset; i++) {
+    string label = labels[i - offset];
+    if ( map_name.find(label) != map_name.end() ) {
+      label = map_name[label];
+    }
+
+    h->GetYaxis()->SetBinLabel(i + 1, drawParamNames ? label.c_str() : "");
+  }
   // for (int i = offset; i < nrNuis + offset; i++) h->GetYaxis()->SetBinLabel(i + 1, "");
   h->LabelsOption("h");
   double labelSize = 1. / nrNuis;
