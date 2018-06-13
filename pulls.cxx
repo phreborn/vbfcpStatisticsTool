@@ -248,7 +248,10 @@ int main(int argc, char** argv)
     TString thisName = parsed[i].c_str();
     TString thisVal;
     TString range;
+    TString boundary;
     bool useRange    = kFALSE;
+    bool useBoundary = kFALSE;
+    int sign = 0;
 
     // Get ranges
     if (thisName.Contains("[")) {
@@ -259,6 +262,29 @@ int main(int argc, char** argv)
       range.ReplaceAll("]","");
       assert(range.Contains(":"));
       useRange = kTRUE;
+    }
+
+
+    // Get sign
+    if (thisName.Contains("+")) {
+      thisName.ReplaceAll("+",">0");
+    } else if (thisName.Contains("-")) {
+      thisName.ReplaceAll("-","<0");
+    }
+
+    // Get boundaries
+    if (thisName.Contains(">")) {
+      TObjArray* thisNameArray = thisName.Tokenize(">");
+      thisName = ((TObjString*)thisNameArray->At(0))->GetString();
+      boundary = ((TObjString*)thisNameArray->At(1))->GetString();
+      sign = +1;
+      useBoundary = kTRUE;
+    } else if (thisName.Contains("<")) {
+      TObjArray* thisNameArray = thisName.Tokenize("<");
+      thisName = ((TObjString*)thisNameArray->At(0))->GetString();
+      boundary = ((TObjString*)thisNameArray->At(1))->GetString();
+      sign = -1;
+      useBoundary = kTRUE;
     }
 
     RooRealVar* thisPoi = (RooRealVar*)ws->var(thisName.Data());
@@ -278,6 +304,31 @@ int main(int argc, char** argv)
       if ((origVal < lo) || (origVal > hi)) {
         double newVal = (hi - lo) / 2;
         thisPoi->setVal(newVal);
+      }
+    }
+
+    if (useBoundary) {
+      double tmpBoundary = atof(boundary.Data());
+      double origVal = thisPoi->getVal();
+      double forigVal = fabs(thisPoi->getVal());
+      bool boundaryIsZero = AlmostEqualUlpsAndAbs(tmpBoundary, 0.0, 0.0001, 4);
+
+      if (sign > 0) {
+        thisPoi->setMin(tmpBoundary);
+        if (origVal < tmpBoundary) {
+          thisPoi->setVal(tmpBoundary);
+        }
+        if (boundaryIsZero && origVal < 0) {
+          thisPoi->setVal(forigVal);
+        }
+      } else if (sign < 0) {
+        thisPoi->setMax(tmpBoundary);
+        if (origVal > tmpBoundary) {
+          thisPoi->setVal(tmpBoundary);
+        }
+        if (boundaryIsZero && origVal > 0) {
+          thisPoi->setVal(-forigVal);
+        }
       }
     }
 
