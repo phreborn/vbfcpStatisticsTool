@@ -115,6 +115,7 @@ int main(int argc, char** argv)
 
   // Bookkeeping
   string classification  = "classification.yaml";
+  string category        = "";
   bool subtractFromTotal = false;
   bool doIndividual = false;
 
@@ -145,6 +146,7 @@ int main(int argc, char** argv)
     ( "optimize"      , po::value<int>( &constOpt )->default_value( constOpt )                     , "Optimize constant terms." )
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                  , "Control verbosity." )
     ( "classification", po::value<string>( &classification )->default_value( classification )      , "Definition of uncertainty categories." )
+    ( "category"      , po::value<string>( &category )->default_value( category )                        , "Specific category which should be submitted" )
     ( "subtractFromTotal", po::bool_switch( &subtractFromTotal )                                   , "Subtract uncertainties from total." )
     ( "doIndividual"  , po::bool_switch( &doIndividual )                                           , "Compute uncertainty for individual sources." )
     ;
@@ -344,12 +346,22 @@ int main(int argc, char** argv)
 
     if (nuisanceClasses.size() > 0) {
       for (auto nuisance_class : nuisanceClasses) {
-        nuisance_assignments[nuisance_class].push_back(name);  
+        nuisance_assignments[nuisance_class].push_back(name);
       }
     } else {
       nuisance_assignments["None"].push_back(name);
     }
   }
+
+  ofstream myfile ("class_details.yaml");
+  for (auto nuisance_class : nuisance_assignments) {
+    myfile << "\n";
+    myfile << nuisance_class.first << ":\n";
+    for (auto name : nuisance_class.second) {
+      myfile << "  - " << name << "\n";
+    }
+  }
+  myfile.close();
 
   // Unconditional fit
   LOG(logINFO) << "Run unconditional fit";
@@ -436,11 +448,11 @@ int main(int argc, char** argv)
   }
 
   ws->saveSnapshot("tmp_shot2", *mc->GetPdf()->getParameters(data));
-  
+
   minimizer.minimize(*cmdList);
   double stat_err_hi = scan_poi_vector[0]->getErrorHi(), stat_err_lo = scan_poi_vector[0]->getErrorLo();
 
-  // Individual nuisance parameters  
+  // Individual nuisance parameters
   double quad_hi = 0, quad_lo = 0;
   map<string, double> ind_err_hi;
   map<string, double> ind_err_lo;
@@ -482,7 +494,7 @@ int main(int argc, char** argv)
       }
 
       set_sys.insert(make_pair(sqrt((1 + ind_err_hi[name]) * (1 + ind_err_lo[name])) - 1, name));
-      
+
       quad_hi += ind_err_hi[name] * ind_err_hi[name];
       quad_lo += ind_err_lo[name] * ind_err_lo[name];
 
@@ -505,6 +517,9 @@ int main(int argc, char** argv)
 
   for (auto class_itr : nuisance_assignments) {
     string nuisance_class = class_itr.first;
+    if (category != "" && !(category == nuisance_class || nuisance_class == "Normalisation" || nuisance_class == "TemplateStatistics")){
+         continue;
+    }
     vector<string> vec = class_itr.second;
     LOG(logINFO) << "On class " << nuisance_class;
 
@@ -526,7 +541,7 @@ int main(int argc, char** argv)
           LOG(logINFO) << "Floating parameter " << name;
           continue;
         }
-        
+
         if (std::find(vec.begin(), vec.end(), name) != vec.end()) {
           LOG(logINFO) << "Floating parameter " << name;
           continue;
@@ -536,7 +551,7 @@ int main(int argc, char** argv)
         v->setConstant(true);
       }
     }
-  
+
     minimizer.minimize(*cmdList);
     all_err_hi[nuisance_class] = scan_poi_vector[0]->getErrorHi();
     all_err_lo[nuisance_class] = scan_poi_vector[0]->getErrorLo();
@@ -551,7 +566,7 @@ int main(int argc, char** argv)
     LOG(logINFO) << "Fixing parameter " << name;
     v->setConstant(true);
   }
-  
+
   ws->saveSnapshot("tmp_shot3", *mc->GetPdf()->getParameters(data));
 
   minimizer.minimize(*cmdList);
@@ -602,7 +617,7 @@ int main(int argc, char** argv)
     }
 
     set_stat.insert(make_pair(sqrt((1 + cr_err_hi[name]) * (1 + cr_err_lo[name])) - 1, name));
-    
+
     v->setConstant(true);
   }
 
@@ -688,7 +703,10 @@ int main(int argc, char** argv)
 
   for (auto class_itr : nuisance_assignments) {
     string nuisance_class = class_itr.first;
-    
+    if (category != "" && !(category == nuisance_class || nuisance_class == "Normalisation" || nuisance_class == "TemplateStatistics")){
+         continue;
+    }
+
     if (subtractFromTotal) {
       all_err_hi_comp[nuisance_class] = subtract_error(err_hi, all_err_hi[nuisance_class]);
       all_err_lo_comp[nuisance_class] = subtract_error(err_lo, all_err_lo[nuisance_class]);
@@ -752,7 +770,10 @@ int main(int argc, char** argv)
 
   for (auto class_itr : nuisance_assignments) {
     string nuisance_class = class_itr.first;
-  
+    if (category != "" && !(category == nuisance_class || nuisance_class == "Normalisation" || nuisance_class == "TemplateStatistics")){
+         continue;
+    }
+
     if (nuisance_class == "Normalisation") {
       continue;
     }
