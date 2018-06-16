@@ -329,6 +329,18 @@ int main(int argc, char** argv)
 
   model->profileParameters(profileName);
 
+  // Add other POIs to nuisance set
+  RooArgSet* nuisOtherPoi = new RooArgSet();
+  nuisOtherPoi->add(*nuis);
+
+  for (RooLinkedListIter it = pois->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+    if ( std::find(scan_poi_vector.begin(), scan_poi_vector.end(), v) == scan_poi_vector.end() ) {
+      nuisOtherPoi->add(*v);
+    }
+  }
+
+  nuisOtherPoi->Print("v");
+
   // Load the classification file
   LOG(logINFO) << "Load classification from " << classification;
   YAML::Node classes = YAML::LoadFile(classification);
@@ -338,16 +350,17 @@ int main(int argc, char** argv)
 
   map<string, vector<string>> nuisance_assignments;
 
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
     vector<string> nuisanceClasses = getClassification(name, classes);
 
     if (nuisanceClasses.size() > 0) {
       for (auto nuisance_class : nuisanceClasses) {
-        nuisance_assignments[nuisance_class].push_back(name);  
+        nuisance_assignments[nuisance_class].push_back(name);
       }
     } else {
       nuisance_assignments["None"].push_back(name);
+      LOG(logWARNING) << "Parameter " << name << " assigned to no categories!";
     }
   }
 
@@ -401,7 +414,7 @@ int main(int argc, char** argv)
   map<string, string> signs_up;
   map<string, string> signs_down;
 
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
     double pull = v->getVal();
     if (pull < 0) {
@@ -416,7 +429,7 @@ int main(int argc, char** argv)
   // Find the statistical uncertainty
   LOG(logINFO) << "Find statistical uncertainty";
 
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
 
     if (subtractFromTotal) {
@@ -436,11 +449,11 @@ int main(int argc, char** argv)
   }
 
   ws->saveSnapshot("tmp_shot2", *mc->GetPdf()->getParameters(data));
-  
+
   minimizer.minimize(*cmdList);
   double stat_err_hi = scan_poi_vector[0]->getErrorHi(), stat_err_lo = scan_poi_vector[0]->getErrorLo();
 
-  // Individual nuisance parameters  
+  // Individual nuisance parameters
   double quad_hi = 0, quad_lo = 0;
   map<string, double> ind_err_hi;
   map<string, double> ind_err_lo;
@@ -455,7 +468,7 @@ int main(int argc, char** argv)
       ws->loadSnapshot("tmp_shot2");
     }
 
-    for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+    for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
       string name = v->GetName();
       LOG(logINFO) << "Getting impact from " << name;
 
@@ -482,7 +495,7 @@ int main(int argc, char** argv)
       }
 
       set_sys.insert(make_pair(sqrt((1 + ind_err_hi[name]) * (1 + ind_err_lo[name])) - 1, name));
-      
+
       quad_hi += ind_err_hi[name] * ind_err_hi[name];
       quad_lo += ind_err_lo[name] * ind_err_lo[name];
 
@@ -510,7 +523,7 @@ int main(int argc, char** argv)
 
     ws->loadSnapshot("tmp_shot");
 
-    for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+    for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
       string name = v->GetName();
 
 
@@ -526,7 +539,7 @@ int main(int argc, char** argv)
           LOG(logINFO) << "Floating parameter " << name;
           continue;
         }
-        
+
         if (std::find(vec.begin(), vec.end(), name) != vec.end()) {
           LOG(logINFO) << "Floating parameter " << name;
           continue;
@@ -536,7 +549,7 @@ int main(int argc, char** argv)
         v->setConstant(true);
       }
     }
-  
+
     minimizer.minimize(*cmdList);
     all_err_hi[nuisance_class] = scan_poi_vector[0]->getErrorHi();
     all_err_lo[nuisance_class] = scan_poi_vector[0]->getErrorLo();
@@ -546,12 +559,12 @@ int main(int argc, char** argv)
   LOG(logINFO) << "Find data statistics and control region statistics uncertainties";
 
   ws->loadSnapshot("tmp_shot");
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
     LOG(logINFO) << "Fixing parameter " << name;
     v->setConstant(true);
   }
-  
+
   ws->saveSnapshot("tmp_shot3", *mc->GetPdf()->getParameters(data));
 
   minimizer.minimize(*cmdList);
@@ -569,7 +582,7 @@ int main(int argc, char** argv)
     poi_names.push_back(v->GetName());
   }
 
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
 
     vector<string> vec_stat = nuisance_assignments["Normalisation"];
@@ -602,7 +615,7 @@ int main(int argc, char** argv)
     }
 
     set_stat.insert(make_pair(sqrt((1 + cr_err_hi[name]) * (1 + cr_err_lo[name])) - 1, name));
-    
+
     v->setConstant(true);
   }
 
@@ -688,7 +701,7 @@ int main(int argc, char** argv)
 
   for (auto class_itr : nuisance_assignments) {
     string nuisance_class = class_itr.first;
-    
+
     if (subtractFromTotal) {
       all_err_hi_comp[nuisance_class] = subtract_error(err_hi, all_err_hi[nuisance_class]);
       all_err_lo_comp[nuisance_class] = subtract_error(err_lo, all_err_lo[nuisance_class]);
@@ -752,7 +765,7 @@ int main(int argc, char** argv)
 
   for (auto class_itr : nuisance_assignments) {
     string nuisance_class = class_itr.first;
-  
+
     if (nuisance_class == "Normalisation") {
       continue;
     }
