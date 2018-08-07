@@ -331,6 +331,18 @@ int main(int argc, char** argv)
 
   model->profileParameters(profileName);
 
+  // Add other POIs to nuisance set
+  RooArgSet* nuisOtherPoi = new RooArgSet();
+  nuisOtherPoi->add(*nuis);
+
+  for (RooLinkedListIter it = pois->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+    if ( std::find(scan_poi_vector.begin(), scan_poi_vector.end(), v) == scan_poi_vector.end() ) {
+      nuisOtherPoi->add(*v);
+    }
+  }
+
+  nuisOtherPoi->Print("v");
+
   // Load the classification file
   LOG(logINFO) << "Load classification from " << classification;
   YAML::Node classes = YAML::LoadFile(classification);
@@ -340,7 +352,7 @@ int main(int argc, char** argv)
 
   map<string, vector<string>> nuisance_assignments;
 
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
     vector<string> nuisanceClasses = getClassification(name, classes);
 
@@ -350,6 +362,7 @@ int main(int argc, char** argv)
       }
     } else {
       nuisance_assignments["None"].push_back(name);
+      LOG(logWARNING) << "Parameter " << name << " assigned to no categories!";
     }
   }
 
@@ -413,7 +426,7 @@ int main(int argc, char** argv)
   map<string, string> signs_up;
   map<string, string> signs_down;
 
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
     double pull = v->getVal();
     if (pull < 0) {
@@ -428,7 +441,7 @@ int main(int argc, char** argv)
   // Find the statistical uncertainty
   LOG(logINFO) << "Find statistical uncertainty";
 
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
 
     if (subtractFromTotal) {
@@ -467,7 +480,7 @@ int main(int argc, char** argv)
       ws->loadSnapshot("tmp_shot2");
     }
 
-    for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+    for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
       string name = v->GetName();
       LOG(logINFO) << "Getting impact from " << name;
 
@@ -525,7 +538,7 @@ int main(int argc, char** argv)
 
     ws->loadSnapshot("tmp_shot");
 
-    for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+    for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
       string name = v->GetName();
 
 
@@ -561,7 +574,7 @@ int main(int argc, char** argv)
   LOG(logINFO) << "Find data statistics and control region statistics uncertainties";
 
   ws->loadSnapshot("tmp_shot");
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
     LOG(logINFO) << "Fixing parameter " << name;
     v->setConstant(true);
@@ -584,7 +597,7 @@ int main(int argc, char** argv)
     poi_names.push_back(v->GetName());
   }
 
-  for (RooLinkedListIter it = nuis->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
+  for (RooLinkedListIter it = nuisOtherPoi->iterator(); RooRealVar* v = dynamic_cast<RooRealVar*>(it.Next());) {
     string name = v->GetName();
 
     vector<string> vec_stat = nuisance_assignments["Normalisation"];
