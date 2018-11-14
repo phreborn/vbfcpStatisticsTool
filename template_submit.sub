@@ -1,0 +1,17 @@
+Universe            = vanilla
+executable          = {RUN}.sh
+output              = {RUN}.out
+log                 = {RUN}.log
+error               = {RUN}.err
+request_cpus        = 1
+request_memory      = {MEM}
++MaxRuntime         = {MAXRUNTIME}
+environment         = "HOME=$ENV(HOME)"
+environment         = "USER=$ENV(USER)"
+environment         = "KRB5CCNAME=$ENV(KRB5CCNAME)"
+transfer_executable = True
+notification        = Complete
+notify_user         = {MAIL}
+queue job from (
+{JOBS}
+)
