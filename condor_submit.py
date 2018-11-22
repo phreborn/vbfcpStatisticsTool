@@ -224,11 +224,11 @@ def main(argv):
 def getJobsPulls(debug, parameter, folder, home_folder, submitdir, parameter_dict):
     jobName = "pulls_{0}".format(parameter)
     parameter_dict["parameter"] = parameter
-    command = "./bin/pulls.exe --input {workspace} --poi {poi} --workspace {workspaceName} --modelconfig {ModelConfigName} --data {dataName} --snapshot {snapshotName} --folder {folder} --loglevel {loglevel} --strategy {strategy} --eps {eps} --precision {precision}"
+    command = "./bin/pulls.exe --input {workspace} --poi {poi} --workspace {workspaceName} --modelconfig {ModelConfigName} --data {dataName} --snapshot {snapshotName} --folder {folder} --loglevel {loglevel} --strategy {strategy} --eps {eps} --precision {precision} --parameter {parameter}"
     command = command.format(**parameter_dict)
-    if profile != "":
+    if parameter_dict['profile'] != "":
         command += " --profile {}".format(parameter_dict["profile"])
-    if fix != "":
+    if parameter_dict['fix'] != "":
         command += " --fix {}".format(parameter_dict["fix"])
     command += " 2>&1;\n"
 
