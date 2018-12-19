@@ -1,0 +1,159 @@
+
+workspaces:
+  # WS-Comb-5XS_80ifb_v7:
+  #   observed:
+      # - poi: r_VBF
+      #   scale_poi: 16.0
+      #   scale_theta: 16.0
+      #   legend: "Comb 5XS VBF"
+      # - poi: r_ggF
+        # scale_poi: 16.0
+        # scale_theta: 16.0
+        # legend: "Comb 5XS ggF"
+      # - poi: r_WH
+      #   scale_poi: 2.0
+      #   scale_theta: 5.0
+      #   legend: "Comb 5XS WH"
+      # - poi: r_ZH
+      #   scale_poi: 2.0
+      #   scale_theta: 5.0
+      #   legend: "Comb 5XS ZH"
+      # - poi: r_ttH
+      #   scale_poi: 2.5
+      #   scale_theta: 5.0
+      #   legend: "Comb 5XS ttH"
+
+  # VBFbb_Prod_mu_v8:
+  #   observed:
+  #     - poi: mu_VBF
+  #       scale_poi: 5.5
+  #       scale_theta: 5.0
+  #       legend: "VBFbb mu_VBF"
+  WS-Comb-5XS_80ifb_v8:
+    observed:
+      - poi: r_ggF
+        scale_poi: 25.5
+        scale_theta: 25.0
+        legend: "Comb5XS r_ggF"
+      - poi: r_VBF
+        scale_poi: 8.5
+        scale_theta: 8.0
+        legend: "Comb5XS r_VBF"
+      - poi: r_WH
+        scale_poi: 5.5
+        scale_theta: 5.0
+        legend: "Comb5XS r_WH"
+      - poi: r_ZH
+        scale_poi: 2.5
+        scale_theta: 5.0
+        legend: "Comb5XS r_ZH"
+      - poi: r_ttH
+        scale_poi: 2.5
+        scale_theta: 5.0
+        legend: "Comb5XS r_ttH"
+
+  # VBFbb_Prod_mu_181025:
+  #   observed:
+  #     - poi: mu_VBF
+  #       scale_poi: 3.0
+  #       scale_theta: 3
+  #       legend: "VHbb only"
+    # asimov:
+    #   - poi: mu_XS_ttH
+    #     scale_poi: 3.0
+    #     scale_theta: 8
+    #     legend: "#gamma#gamma only"
+
+  # WS-HZZ-4XS_noBR_lumi_split_ProdModes:
+  #   observed:
+  #     - poi: mu_ggF
+  #       scale_poi: 16.0
+  #       scale_theta: 16.0
+  #       legend: "HZZ 4XS ggF"
+  #     - poi: mu_VBF
+  #       scale_poi: 10.0
+  #       scale_theta: 10.0
+  #       legend: "HZZ 4XS VBF"
+  #     - poi: mu_VH
+  #       scale_poi: 8.0
+  #       scale_theta: 8.0
+  #       legend: "HZZ 4XS VH"
+  #     - poi: mu_ttH
+  #       scale_poi: 400.0
+  #       scale_theta: 400.0
+  #       legend: "HZZ 4XS ttH"
+  #
+  # WS-Htautau-5XS_noBR_lumi_split:
+  #   observed:
+  # #     - poi: r_ggF_tautau
+  # #       scale_poi: 3.0
+  # #       scale_theta: 3.0
+  # #       legend: "Htautau 5XS ggF"
+  #     - poi: r_VBF_tautau
+  #       scale_poi: 1.5
+  #       scale_theta: 2.0
+  #       legend: "Htautau 5XS VBF"
+
+  # WS-HWW-5XS_noBR_lumi_split:
+  #   observed:
+  #     - poi: r_ggF
+  #       scale_poi: 12.0
+  #       scale_theta: 10.0
+  #       legend: "HWW 5XS ggF"
+  #     - poi: r_VBF
+  #       scale_poi: 7.0
+  #       scale_theta: 10.0
+  #       legend: "HWW 5XS VBF"
+
+  # WS-Comb-5XS_80ifb_v7:
+  #   observed:
+  #     - poi: r_ggF
+  #       scale_poi: 3.5
+  #       scale_theta: 3.5
+  #       legend: "CombWS 5XS r_ggF"
+  #     - poi: r_VBF
+  #       scale_poi: 3.5
+  #       scale_theta: 3.5
+  #       legend: "CombWS 5XS r_VBF"
+  #     - poi: r_WH
+  #       scale_poi: 3.5
+  #       scale_theta: 3.5
+  #       legend: "CombWS 5XS r_WH"
+  #     - poi: r_ZH
+  #       scale_poi: 3.5
+  #       scale_theta: 3.5
+  #       legend: "CombWS 5XS r_ZH"
+  #     - poi: r_ttH
+  #       scale_poi: 3.5
+  #       scale_theta: 3.5
+  #       legend: "CombWS 5XS r_ttH"
+
+  # WS-VHbb-5XS_noBR_80ifb_lumi_split_181122:
+  #   observed:
+  #     - poi: r_WH
+  #       scale_poi: 3.5
+  #       scale_theta: 3.5
+  #       legend: "VHbb 5XS WH"
+  #     - poi: r_ZH
+  #       scale_poi: 4.0
+  #       scale_theta: 4.0
+  #       legend: "VHbb 5XS ZH"
+  #
+  # WS-HGam-4XS_80ifb_ProdModes_181123_v8:
+  #   observed:
+  #     - poi: mu_ggF
+  #       scale_poi: 12.5
+  #       scale_theta: 12.5
+  #       legend: "HGam 4XS mu_ggF"
+  #     - poi: mu_VBF
+  #       scale_poi: 3.5
+  #       scale_theta: 3.5
+  #       legend: "HGam 4XS mu_VBF"
+  #     - poi: mu_VH
+  #       scale_poi: 3.5
+  #       scale_theta: 3.5
+  #       legend: "HGam 4XS mu_VH"
+  #     - poi: mu_ttH
+  #       scale_poi: 9.5
+  #       scale_theta: 9.5
+  #       legend: "HGam 4XS mu_ttH"

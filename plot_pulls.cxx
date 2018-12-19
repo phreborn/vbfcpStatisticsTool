@@ -92,6 +92,7 @@ int main(int argc, char **argv) {
   string overlayCard = "";
   string poiname = "mu";
   string names = "";
+  string label_on_plot = "LHC Run 1";
 
   int firstParameter = 1;
   int showTopParameters = -1;
@@ -142,6 +143,7 @@ int main(int argc, char **argv) {
     ( "rank"          , po::value<bool>( &rankNuis )->default_value( rankNuis )                           , "Order nuisances by impact." )
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                         , "POIs to use." )
     ( "map"           , po::value<string>( &names )->default_value( names )                  , "Path to nice parameter names." )
+    ( "label"         , po::value<string>( &label_on_plot )->default_value( label_on_plot )               , "Label on plot" )
     ;
 
   po::variables_map vm0;
@@ -176,10 +178,10 @@ int main(int argc, char **argv) {
   // - DEBUG
   LOG::ReportingLevel() = LOG::FromString(loglevel);
 
-  if (useRelativeImpact) {
-    LOG(logWARNING) << "Can't use relative impact at the moment. Switch to absolute variation";
-    useRelativeImpact = false;
-  }
+  // if (useRelativeImpact) {
+  //   LOG(logWARNING) << "Can't use relative impact at the moment. Switch to absolute variation";
+  //   useRelativeImpact = false;
+  // }
 
   // Modifications of inputs
   firstParameter -= 1;
@@ -196,7 +198,7 @@ int main(int argc, char **argv) {
   TPad *pad1 = new TPad("pad1", "pad1", 0.0, 0.0, 1.0, 1.0, 0);
 
   if (drawParamNames) {
-    pad1->SetLeftMargin(0.4);
+    pad1->SetLeftMargin(0.35);
   } else {
     pad1->SetLeftMargin(0.05);
   }
@@ -228,6 +230,7 @@ int main(int argc, char **argv) {
   vector<double> up;
   vector<double> down;
   vector<double> poi_hat;
+  vector<double> poi_hat_copy;
   vector<double> poi_up;
   vector<double> poi_down;
   vector<double> poi_nom_up;
@@ -277,6 +280,7 @@ int main(int argc, char **argv) {
     double val_poi_nom_down = 1.0 * formula_poi_nom_down->EvalInstance();
 
     poi_hat.push_back(val_poi_hat);
+    poi_hat_copy.push_back(val_poi_hat);
     poi_up.push_back(val_poi_up);
     poi_down.push_back(val_poi_down);
     poi_nom_up.push_back(val_poi_nom_up);
@@ -308,6 +312,7 @@ int main(int argc, char **argv) {
   vector<double> poi_nom_down2 = poi_nom_down;
 
   poi_hat.resize(2 * nrNuis);
+  poi_hat_copy.resize(2 * nrNuis);
   poi_up.resize(2 * nrNuis);
   poi_down.resize(2 * nrNuis);
   poi_nom_up.resize(2 * nrNuis);
@@ -1118,28 +1123,28 @@ int main(int argc, char **argv) {
     }
 
     if (useRelativeImpact) {
-      poi_up[2 * i] /= sigma_tot_hi;
-      poi_up[2 * i + 1] /= sigma_tot_hi;
-      poi_down[2 * i] /= sigma_tot_lo;
-      poi_down[2 * i + 1] /= sigma_tot_lo;
+      poi_up[2 * i] /= poi_hat_copy[2 * i];
+      poi_up[2 * i + 1] /= poi_hat_copy[2 * i + 1];
+      poi_down[2 * i] /= poi_hat_copy[2 * i];
+      poi_down[2 * i + 1] /= poi_hat_copy[2 * i + 1];
 
       if (overlayCard != "") {
-        poi_up_ol[2 * i] /= sigma_tot_ol_hi;
-        poi_up_ol[2 * i + 1] /= sigma_tot_ol_hi;
-        poi_down_ol[2 * i] /= sigma_tot_ol_lo;
-        poi_down_ol[2 * i + 1] /= sigma_tot_ol_lo;
+        poi_up_ol[2 * i] /= poi_hat_copy[2 * i];
+        poi_up_ol[2 * i + 1] /= poi_hat_copy[2 * i + 1];
+        poi_down_ol[2 * i] /= poi_hat_copy[2 * i];
+        poi_down_ol[2 * i + 1] /= poi_hat_copy[2 * i + 1];
       }
 
-      poi_nom_up[2 * i] /= sigma_tot_hi;
-      poi_nom_up[2 * i + 1] /= sigma_tot_hi;
-      poi_nom_down[2 * i] /= sigma_tot_lo;
-      poi_nom_down[2 * i + 1] /= sigma_tot_lo;
+      poi_nom_up[2 * i] /= poi_hat_copy[2 * i];
+      poi_nom_up[2 * i + 1] /= poi_hat_copy[2 * i + 1];
+      poi_nom_down[2 * i] /= poi_hat_copy[2 * i];
+      poi_nom_down[2 * i + 1] /= poi_hat_copy[2 * i + 1];
 
       if (overlayCard != "") {
-        poi_nom_up_ol[2 * i] /= sigma_tot_ol_hi;
-        poi_nom_up_ol[2 * i + 1] /= sigma_tot_ol_hi;
-        poi_nom_down_ol[2 * i] /= sigma_tot_ol_lo;
-        poi_nom_down_ol[2 * i + 1] /= sigma_tot_ol_lo;
+        poi_nom_up_ol[2 * i] /= poi_hat_copy[2 * i];
+        poi_nom_up_ol[2 * i + 1] /= poi_hat_copy[2 * i + 1];
+        poi_nom_down_ol[2 * i] /= poi_hat_copy[2 * i];
+        poi_nom_down_ol[2 * i + 1] /= poi_hat_copy[2 * i + 1];
       }
     }
 
@@ -1399,9 +1404,10 @@ int main(int argc, char **argv) {
 
   // histogram to get the nuisance parameter labels correct
   TH2F *h = new TH2F("h", "", 1, border_lo, border_hi, nrNuis + offset + 1, -offset, nrNuis + 1);
-  
+
   for (int i = offset; i < nrNuis + offset; i++) {
     string label = labels[i - offset];
+    std::cout << label << std::endl;
     if ( map_name.find(label) != map_name.end() ) {
       label = map_name[label];
     }
@@ -1411,7 +1417,10 @@ int main(int argc, char **argv) {
   // for (int i = offset; i < nrNuis + offset; i++) h->GetYaxis()->SetBinLabel(i + 1, "");
   h->LabelsOption("h");
   double labelSize = 1. / nrNuis;
+  if (showTopParameters != -1)
+    labelSize = 1.0 / showTopParameters;
   h->SetLabelSize(labelSize > 0.02 ? 0.02 : labelSize, "Y");
+  // h->GetYaxis()->SetLabelSize(0.035);
   h->GetXaxis()->SetLabelColor(kWhite);
   h->GetXaxis()->SetAxisColor(kWhite);
   h->GetYaxis()->SetLabelColor(kBlack);
@@ -1569,7 +1578,7 @@ int main(int argc, char **argv) {
   stringstream ranklabel;
   ranklabel << "Rank " << firstParameter + 1 << " to " << (firstParameter + showTopParameters == -1 ? labels.size() : firstParameter + showTopParameters);
 
-  label_tex_2.DrawLatex(position_label_x, position_label_y - 1 * position_label_delta_y, "LHC Run 1");
+  label_tex_2.DrawLatex(position_label_x, position_label_y - 1 * position_label_delta_y, label_on_plot.c_str());
   label_tex_2.DrawLatex(position_label_x, position_label_y - 2 * position_label_delta_y, ranklabel.str().c_str());
 
   // Cleanup
