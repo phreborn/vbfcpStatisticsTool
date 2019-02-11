@@ -58,8 +58,8 @@ include_directories(${PROJECT_INCLUDE_DIRS})
 
 # ATLAS style
 include_directories(${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/)
-file(GLOB sources ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.C)
-file(GLOB headers ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.h)
+file(GLOB sources RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.C)
+file(GLOB headers RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.h)
 
 # Generate dictionary
 ROOT_GENERATE_DICTIONARY(G__StatisticsTools utils.hxx ExtendedModel.hxx ExtendedMinimizer.hxx ${headers} LINKDEF LinkDef.h)
