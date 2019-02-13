@@ -462,7 +462,6 @@ void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type, double cl) {
     Double_t cls_prev = h_pcls->GetBinContent(i-1);
 
     // Upward transition
-    double mu_05;
     if (cls>alpha && cls_prev<alpha) {
       double grad = (cls-cls_prev)/(mu-mu_prev);
       mu_05 = mu_prev + (alpha-cls_prev)/grad;
