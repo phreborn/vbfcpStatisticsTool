@@ -42,8 +42,17 @@ int main(int argc, char** argv)
   double highEdge = 0.5;
   double boundary = 0.0;
   string limitType = "upper";
-  char style = 't';
   double cl = 0.95;
+
+  // Limit style
+  // Choices:
+  // t: t_mu: 2-sided limits
+  // T: t~_mu: F-C limits
+  // u: q_mu: 1-sided upper limit
+  // U: q~_mu: 1-sided upper limit with bound
+  // y: t_mu with t~_mu asymptotics
+  // Y: t~_mu with t_mu asymptotics
+  char style = 't';
 
   // Misc settings
   string loglevel = "INFO";
