@@ -135,7 +135,7 @@ int main(int argc, char** argv)
   }
 
   delete f;
-  LOG(logDEBUG) << "Oberved histograms filled.";
+  LOG(logDEBUG) << "Observed histograms filled.";
 
   LOG(logDEBUG) << "Reading expected graph " << asimovScanName << " from file " << inFileName << ".";
   f = TFile::Open(inFileName.c_str());
@@ -150,6 +150,9 @@ int main(int argc, char** argv)
   LOG(logDEBUG) << "Expected histogram filled.";
 
   // Debug plot for validation
+
+  TCanvas* c = new TCanvas("c","c",800,800);
+  c->cd(1);
   h_ll_obs->SetLineColor(kRed);
   h_ll_obs->SetLineColor(kAzure);
   h_ll_obs->Draw();
@@ -160,6 +163,7 @@ int main(int argc, char** argv)
   leg->AddEntry(h_ll_obs, "observed", "l");
   leg->AddEntry(h_ll_asi, "expected", "l");
   leg->Draw("same");
+  c->Print("debug_scan.pdf");
 
   // Run limit computation
   driver(h_ll_obs, h_ll_asi, style, cl);
@@ -499,4 +503,5 @@ void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type, double cl) {
   c->cd(2);
   h_sqrtqmu->Draw();
   h_sqrtqmu_A->Draw("same");
+  c->Print("debug_cls.pdf");
 }
