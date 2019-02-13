@@ -302,8 +302,8 @@ void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type, double cl) {
       break;
     }
 
-    LOG(logDEBUG) << "Bin " << i << ": qmu (observed) = " << qmu;
-    LOG(logDEBUG) << "Bin " << i << ": qmu (expected) = " << qmu_A;
+    LOG(logDEBUG) << "Bin " << i << "(" << h_pcls->GetBinCenter(i) << "): qmu (observed) = " << qmu;
+    LOG(logDEBUG) << "Bin " << i << "(" << h_pcls->GetBinCenter(i) << "): qmu (expected) = " << qmu_A;
 
     // Histogramming
     h_qmu->SetBinContent(i, qmu);
@@ -321,8 +321,8 @@ void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type, double cl) {
       h_sqrtqmu_A->SetBinContent(i, sqrtqmu_A);
     }
 
-    LOG(logDEBUG) << "Bin " << i << ": sqrt(qmu) (observed) = " << sqrtqmu;
-    LOG(logDEBUG) << "Bin " << i << ": sqrt(qmu) (expected) = " << sqrtqmu_A;
+    LOG(logDEBUG) << "Bin " << i << "(" << h_pcls->GetBinCenter(i) << "): sqrt(qmu) (observed) = " << sqrtqmu;
+    LOG(logDEBUG) << "Bin " << i << "(" << h_pcls->GetBinCenter(i) << "): sqrt(qmu) (expected) = " << sqrtqmu_A;
 
     // Asymptotic calculations of p-values
     Double_t pnull, palt;
@@ -397,9 +397,9 @@ void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type, double cl) {
 
     if (palt < 1e-30) palt = 1e-30;
 
-    LOG(logDEBUG) << "Bin " << i << ": p_null = " << pnull;
-    LOG(logDEBUG) << "Bin " << i << ": p_alt = " << palt;
-    LOG(logDEBUG) << "Bin " << i << ": p_null / p_alt = " << pnull / palt;
+    LOG(logDEBUG) << "Bin " << i << "(" << h_pcls->GetBinCenter(i) << "): p_null = " << pnull;
+    LOG(logDEBUG) << "Bin " << i << "(" << h_pcls->GetBinCenter(i) << "): p_alt = " << palt;
+    LOG(logDEBUG) << "Bin " << i << "(" << h_pcls->GetBinCenter(i) << "): p_null / p_alt = " << pnull / palt;
 
     if (!haveTilde || mu>0) {
       h_pnull->SetBinContent(i, pnull);
