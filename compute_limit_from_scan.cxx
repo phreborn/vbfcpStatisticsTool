@@ -25,7 +25,7 @@ using namespace std;
 // _____________________________________________________________________________
 // Declarations of functions used in this file
 
-void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type);
+void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type, double cl);
 
 // _____________________________________________________________________________
 // Main routine
@@ -43,6 +43,7 @@ int main(int argc, char** argv)
   double boundary = 0.0;
   string limitType = "upper";
   char style = 't';
+  double cl = 0.95;
 
   // Misc settings
   string loglevel = "INFO";
@@ -63,6 +64,7 @@ int main(int argc, char** argv)
     ( "boundary" , po::value<double>( &boundary )->default_value( boundary )                 , "Value of the physical boundary, if present." )
     ( "type"     , po::value<string>( &limitType )->default_value( limitType )               , "Upper or lower limit." )
     ( "style"    , po::value<char>( &style )->default_value( style )                         , "Test statistics and aymptotics. Choices: t: t_mu; T: t~_mu; y: t_mu(t~_mu asymptotics); Y: t~_mu(t_mu asymptotics); u: q_mu; U: q~_mu." )
+    ( "cl"       , po::value<double>( &cl )->default_value( cl )                             , "Confidence level." )
     ( "loglevel" , po::value<string>( &loglevel )->default_value( loglevel )                 , "POIs to use." )
    ;
 
@@ -151,11 +153,14 @@ int main(int argc, char** argv)
   leg->Draw("same");
 
   // Run limit computation
-  driver(h_ll_obs, h_ll_asi, style);
+  driver(h_ll_obs, h_ll_asi, style, cl);
 }
 
 // _____________________________________________________________________________
-void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type) {
+void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type, double cl) {
+  string cl_string = std::to_string(cl * 100);
+  double alpha = 1 - cl;
+
   Int_t nbin = h_ll_obs->GetNbinsX();
 
   Bool_t haveTilde(kFALSE);
@@ -390,8 +395,8 @@ void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type) {
     }
   }
 
-  // Scan for CLs+b transitions over alpha=0.05
-  LOG(logINFO) << "Scan for CLs+b transitions over alpha=0.05";
+  // Scan for CLs+b transitions over alpha=1-cl
+  LOG(logINFO) << "Scan for CLs+b transitions over alpha=" << alpha;
 
   bool have_up(false);
   bool have_dn(false);
@@ -405,32 +410,32 @@ void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type) {
     Double_t clsb_prev = h_pnull->GetBinContent(i-1);
 
     // Upward transition
-    if (clsb>0.05 && clsb_prev<0.05) {
+    if (clsb>alpha && clsb_prev<alpha) {
       double grad = (clsb-clsb_prev)/(mu-mu_prev);
-      mu_05 = mu_prev + (0.05-clsb_prev)/grad;
+      mu_05 = mu_prev + (alpha-clsb_prev)/grad;
 
       if (!have_up && type != 'u' && type != 'U') {
         // Print first upward transition
-        LOG(logWARNING) << "Lower limit on CL(S+B) (95%CL) at mu=" << mu_05;
+        LOG(logWARNING) << "Lower limit on CL(S+B) (" << cl_string << "%CL) at mu=" << mu_05;
         have_up = true;
       }
     }
 
     // Downward transition
-    if (clsb_prev>0.05 && clsb<0.05) {
+    if (clsb_prev>alpha && clsb<alpha) {
       double grad = (clsb-clsb_prev)/(mu-mu_prev);
-      mu_05 = mu_prev + (0.05-clsb_prev)/grad;
+      mu_05 = mu_prev + (alpha-clsb_prev)/grad;
       have_dn = true;
     }
   }
 
   if (have_dn) {
   // Print last downared transition
-    LOG(logWARNING) << "Upper limit on CL(S+B) (95%CL) at mu=" << mu_05;
+    LOG(logWARNING) << "Upper limit on CL(S+B) (" << cl_string << "%CL) at mu=" << mu_05;
   }
 
-  // Scan for CLs transitions over alpha=0.05
-  LOG(logINFO) << "Scan for CLs transitions over alpha=0.05";
+  // Scan for CLs transitions over alpha=1-cl
+  LOG(logINFO) << "Scan for CLs transitions over alpha=" << alpha;
 
   have_up = false;
   have_dn = false;
@@ -445,28 +450,28 @@ void driver(TH1D* h_ll_obs, TH1D* h_ll_asi, char type) {
 
     // Upward transition
     double mu_05;
-    if (cls>0.05 && cls_prev<0.05) {
+    if (cls>alpha && cls_prev<alpha) {
       double grad = (cls-cls_prev)/(mu-mu_prev);
-      mu_05 = mu_prev + (0.05-cls_prev)/grad;
+      mu_05 = mu_prev + (alpha-cls_prev)/grad;
 
       if (!have_up && type != 'u' && type != 'U') {
         // Print first upward transition
-        LOG(logWARNING) << "Lower limit on CLs (95%CL) at mu=" << mu_05;
+        LOG(logWARNING) << "Lower limit on CLs (" << cl_string << "%CL) at mu=" << mu_05;
         have_up = true;
       }
     }
 
     // Downward transition
-    if (cls_prev>0.05 && cls<0.05) {
+    if (cls_prev>alpha && cls<alpha) {
       double grad = (cls-cls_prev)/(mu-mu_prev);
-      mu_05 = mu_prev + (0.05-cls_prev)/grad;
+      mu_05 = mu_prev + (alpha-cls_prev)/grad;
       have_dn=true;
     }
   }
 
   if (have_dn) {
   // Print last downared transition
-    LOG(logWARNING) << "Upper limit on CLs (95%CL) at mu=" << mu_05;
+    LOG(logWARNING) << "Upper limit on CLs (" << cl_string << "%CL) at mu=" << mu_05;
   }
 
   // Debug plot
