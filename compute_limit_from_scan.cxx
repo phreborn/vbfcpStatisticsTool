@@ -154,6 +154,10 @@ int main(int argc, char** argv)
 
   // Run limit computation
   driver(h_ll_obs, h_ll_asi, style, cl);
+
+  PrintResourcesUsed(thistime);
+
+  return 0;
 }
 
 // _____________________________________________________________________________
