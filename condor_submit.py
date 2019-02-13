@@ -21,7 +21,7 @@ __email__ = "stefan.gadatsch@cern.ch"
 # set general parameters
 memory = 8000
 MaxRuntime = 36*60*60
-mail = "tim.michael.heinz.wolf@cern.ch"
+mail = "$USER@cern.ch"
 
 # template scripts
 sub_temp = "template_submit.sub"

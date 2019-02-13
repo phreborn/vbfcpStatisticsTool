@@ -78,7 +78,7 @@ def getJobDef(replacedir):
 #PBS -N pulls_{folder}_{category}
 #PBS -o qsub/{folder}/stdout_{category}.out
 #PBS -q {queue}
-#PBS -u twolf
+#PBS -u $USER
 #PBS -l pvmem=16000MB
 
 WORKDIR=$TMPDIR/PBS_$PBS_JOBID
