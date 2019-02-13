@@ -26,6 +26,9 @@ set(EXECUTABLE_PLOT_SCAN plot_scan.exe)
 set(SOURCE_FILES_BREAKDOWN breakdown.cxx)
 set(EXECUTABLE_BREAKDOWN breakdown.exe)
 
+set(SOURCE_FILES_LIMIT compute_limit_from_scan.cxx)
+set(EXECUTABLE_LIMIT compute_limit_from_scan.exe)
+
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(-std=c++14 COMPILER_SUPPORTS_CXX14)
 if(COMPILER_SUPPORTS_CXX14)
@@ -87,3 +90,6 @@ target_link_libraries(${EXECUTABLE_PLOT_SCAN} StatisticsTools ${PROJECT_LIBRARIE
 
 add_executable(${EXECUTABLE_BREAKDOWN} ${SOURCE_FILES_BREAKDOWN})
 target_link_libraries(${EXECUTABLE_BREAKDOWN} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_LIMIT} ${SOURCE_FILES_LIMIT})
+target_link_libraries(${EXECUTABLE_LIMIT} StatisticsTools ${PROJECT_LIBRARIES})
