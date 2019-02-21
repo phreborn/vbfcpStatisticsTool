@@ -59,8 +59,8 @@ find_package(Boost 1.60 COMPONENTS REQUIRED program_options log log_setup system
 find_package(YamlCpp REQUIRED)
 
 # Eigen
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-include_directories(${EIGEN3_INCLUDE_DIR})
+find_package(Eigen 3.0 REQUIRED)
+include_directories(${Eigen_INCLUDE_DIRS})
 
 # Includes
 set(PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIR})
@@ -78,7 +78,7 @@ ROOT_GENERATE_DICTIONARY(G__StatisticsTools utils.hxx RooMultiVarGaussianHighPre
 # Shared library with generated dictionary
 set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES} ${YAMLCPP_LIBRARY})
 add_library(StatisticsTools SHARED utils.cxx RooMultiVarGaussianHighPrecision.cxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx ${sources})
-target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES} Eigen3::Eigen)
+target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
 
 # Create a main program using the library
 add_executable(${EXECUTABLE_FIT} ${SOURCE_FILES_FIT})

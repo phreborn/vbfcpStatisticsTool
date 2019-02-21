@@ -598,7 +598,7 @@ int main(int argc, char **argv) {
     nTot += bins[i].b + s;
   }
 
-  LOG(logDEBUG) << "Total signal: " << nSigTot << endl;
+  LOG(logDEBUG) << "Total signal: " << nSigTot;
 
   vector<string> unique_channels = channels;
 
