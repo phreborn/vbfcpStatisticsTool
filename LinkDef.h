@@ -1,6 +1,7 @@
 #include "utils.hxx"
 #include "ExtendedModel.hxx"
 #include "ExtendedMinimizer.hxx"
+#include "RooMultiVarGaussianHighPrecision.h"
 
 #ifdef __CINT__
 
@@ -10,7 +11,9 @@
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
 
+#pragma link C++ class TOwnedList+ ;
 #pragma link C++ class ExtendedModel+;
 #pragma link C++ class ExtendedMinimizer+;
+#pragma link C++ class RooMultiVarGaussianHighPrecision+;
 
 #endif // __CINT__

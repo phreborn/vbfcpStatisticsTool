@@ -27,6 +27,9 @@ set(EXECUTABLE_PLOT_SCAN plot_scan.exe)
 set(SOURCE_FILES_BREAKDOWN breakdown.cxx)
 set(EXECUTABLE_BREAKDOWN breakdown.exe)
 
+set(SOURCE_FILES_PLOT_LOGSB plot_logsb.cxx)
+set(EXECUTABLE_PLOT_LOGSB plot_logsb.exe)
+
 set(SOURCE_FILES_LIMIT compute_limit_from_scan.cxx)
 set(EXECUTABLE_LIMIT compute_limit_from_scan.exe)
 
@@ -55,6 +58,10 @@ find_package(Boost 1.60 COMPONENTS REQUIRED program_options log log_setup system
 # YAML
 find_package(YamlCpp REQUIRED)
 
+# Eigen
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 # Includes
 set(PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIR})
 include(${ROOT_USE_FILE})
@@ -66,12 +73,12 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.C)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.h)
 
 # Generate dictionary
-ROOT_GENERATE_DICTIONARY(G__StatisticsTools utils.hxx ExtendedModel.hxx ExtendedMinimizer.hxx ${headers} LINKDEF LinkDef.h)
+ROOT_GENERATE_DICTIONARY(G__StatisticsTools utils.hxx RooMultiVarGaussianHighPrecision.h ExtendedModel.hxx ExtendedMinimizer.hxx ${headers} LINKDEF LinkDef.h)
 
 # Shared library with generated dictionary
 set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES} ${YAMLCPP_LIBRARY})
-add_library(StatisticsTools SHARED utils.cxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx ${sources})
-target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
+add_library(StatisticsTools SHARED utils.cxx RooMultiVarGaussianHighPrecision.cxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx ${sources})
+target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES} Eigen3::Eigen)
 
 # Create a main program using the library
 add_executable(${EXECUTABLE_FIT} ${SOURCE_FILES_FIT})
@@ -91,6 +98,9 @@ target_link_libraries(${EXECUTABLE_PLOT_SCAN} StatisticsTools ${PROJECT_LIBRARIE
 
 add_executable(${EXECUTABLE_BREAKDOWN} ${SOURCE_FILES_BREAKDOWN})
 target_link_libraries(${EXECUTABLE_BREAKDOWN} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_PLOT_LOGSB} ${SOURCE_FILES_PLOT_LOGSB})
+target_link_libraries(${EXECUTABLE_PLOT_LOGSB} StatisticsTools ${PROJECT_LIBRARIES})
 
 add_executable(${EXECUTABLE_LIMIT} ${SOURCE_FILES_LIMIT})
 target_link_libraries(${EXECUTABLE_LIMIT} StatisticsTools ${PROJECT_LIBRARIES})

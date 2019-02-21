@@ -25,6 +25,20 @@
 using namespace std;
 
 
+
+TOwnedList::TOwnedList() : TList() { SetOwner(); }
+TOwnedList::~TOwnedList()          { Clear(); }
+void TOwnedList::Clear(Option_t *option)
+{
+  if (!option || strcmp(option,"nodelete")!=0)
+    for (TIter it(this); TObject* obj= it();) {
+      // cout << "Delete "<<obj->ClassName()<<"::"<<obj->GetName()<<(obj->IsOnHeap()?"":" (not on heap)")<<endl;
+      delete obj;
+    }
+  TList::Clear("nodelete");
+}
+
+
 // _____________________________________________________________________________
 // Load custom functions
 extern void loadCustom() {
