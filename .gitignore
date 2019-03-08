@@ -1,1 +1,11 @@
 *.so
+.*.un~
+*~
+bin/
+bsub/
+build/
+lib/
+pdf-files/
+root-files/
+workspace
+
