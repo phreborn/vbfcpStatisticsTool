@@ -3,6 +3,7 @@
 *~
 bin/
 bsub/
+condor/
 build/
 lib/
 pdf-files/
