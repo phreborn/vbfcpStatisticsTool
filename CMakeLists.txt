@@ -4,10 +4,12 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 message("Project dir is ${PROJECT_SOURCE_DIR}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-set(CMAKE_INSTALL_BINDIR ${PROJECT_SOURCE_DIR}/bin)
-set(CMAKE_INSTALL_LIBDIR ${PROJECT_SOURCE_DIR}/lib)
+if(NOT DEFINED ENV{AtlasProject}) # not needed when inside ATLAS environment
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+  set(CMAKE_INSTALL_BINDIR ${PROJECT_SOURCE_DIR}/bin)
+  set(CMAKE_INSTALL_LIBDIR ${PROJECT_SOURCE_DIR}/lib)
+endif()
 
 set(SOURCE_FILES_FIT fit.cxx)
 set(EXECUTABLE_FIT fit.exe)
@@ -50,13 +52,13 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH}
 
 # CERN ROOT
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
-find_package(ROOT REQUIRED COMPONENTS Core Gpad Hist HistFactory MathCore Matrix Minuit Net Physics RIO Rint RooFit RooFitCore RooStats TMVA Thread Tree TreePlayer)
+find_package(ROOT REQUIRED COMPONENTS Core Gpad Hist HistFactory MathCore Matrix Minuit Net Physics RIO Rint RooFit RooFitCore RooStats TMVA Thread Tree TreePlayer Graf)
 
 # BOOST
 find_package(Boost 1.60 COMPONENTS REQUIRED program_options log log_setup system filesystem date_time thread chrono)
 
 # YAML
-find_package(YamlCpp REQUIRED)
+include(cmake/Modules/YamlCpp.cmake)
 
 # Eigen
 find_package(Eigen 3.0 REQUIRED)
@@ -64,7 +66,10 @@ include_directories(${Eigen_INCLUDE_DIRS})
 
 # Includes
 set(PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIR})
-include(${ROOT_USE_FILE})
+if(NOT DEFINED ENV{AtlasProject}) # not defined when inside ATLAS environment
+  include(${ROOT_USE_FILE})
+endif()
+
 include_directories(${PROJECT_INCLUDE_DIRS})
 
 # ATLAS style
@@ -73,12 +78,13 @@ file(GLOB sources RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/atlasstyl
 file(GLOB headers RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.h)
 
 # Generate dictionary
-ROOT_GENERATE_DICTIONARY(G__StatisticsTools utils.hxx RooMultiVarGaussianHighPrecision.h ExtendedModel.hxx ExtendedMinimizer.hxx ${headers} LINKDEF LinkDef.h)
+ROOT_GENERATE_DICTIONARY(G__StatisticsTools MODULE utils.hxx RooMultiVarGaussianHighPrecision.h ExtendedModel.hxx ExtendedMinimizer.hxx ${headers} LINKDEF LinkDef.h)
 
 # Shared library with generated dictionary
-set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES} ${YAMLCPP_LIBRARY})
+set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES})
 add_library(StatisticsTools SHARED utils.cxx RooMultiVarGaussianHighPrecision.cxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx ${sources})
 target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
+add_dependencies(StatisticsTools YAML-CPP)
 
 # Create a main program using the library
 add_executable(${EXECUTABLE_FIT} ${SOURCE_FILES_FIT})
