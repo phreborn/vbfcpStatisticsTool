@@ -49,71 +49,68 @@ def parse_args(argv):
     p.add_argument("--precision", type=str, default="0.01", help="Precision of uncertainty evaluation.")
     p.add_argument("--eps", type=str, default="1.0", help="Eps.")
     p.add_argument("--loglevel", type=str, default="INFO", help="Control the printout.")
-    p.add_argument("--queue", type=str, default="generic", help="Queue to submit to.")
-    p.add_argument("--scanRange", type=str, default="0.0-2.0", help="Range which should be scanned.")
+    p.add_argument("--queue", type=str, default="espresso", help="Queue to submit to.")
+    p.add_argument("--scanRange", type=str, default="0.0:2.0", help="Range which should be scanned.")
     p.add_argument("--bins", type=str, default="10", help="Number of bins for the scanned range.")
     p.add_argument("--pointsPerJob", type=str, default="1", help="Points to scan per job.")
 
+    p.add_argument("--mail", type=str, default="$USER@cern.ch", help="Notifications.")
+    p.add_argument("--mem", type=str, default="8000", help="Memory.")
+    p.add_argument("--pool", type=str, default="1000", help="Pool.")
+    p.add_argument("--rmem", type=str, default="2000", help="RMemory.")
+    p.add_argument("--swap", type=str, default="8000", help="Swap.")
+    p.add_argument("--time", type=str, default="129600", help="Run time.")
+
+    batchsystem = p.add_mutually_exclusive_group()
+    batchsystem.add_argument('--condor', help='CERN condor', action='store_true')
+    batchsystem.add_argument('--lsf', help='CERN LSF', action='store_true')
+
     args = p.parse_args()
 
-    config = {}
+    if ("<" in args.profile or ">" in args.profile):
+        args.profile = "'" + args.profile + "'"
 
-    config["workspace"] = args.workspace
-    config["folder"] = args.folder
-    config["queue"] = args.queue
-    config["workspaceName"] = args.workspaceName
-    config["ModelConfigName"] = args.ModelConfigName
-    config["dataName"] = args.dataName
-    config["poi"] = args.poi
-    config["snapshotName"] = args.snapshotName
-    config["loglevel"] = args.loglevel
-    config["profile"] = args.profile
-    config["fix"] = args.fix
-    config["strategy"] = args.strategy
-    config["eps"] = args.eps
-    config["precision"] = args.precision
-    config["scanRange"] = args.scanRange
-    config["bins"] = args.bins
-    config["pointsPerJob"] = args.pointsPerJob
-
-    if ("<" in config["profile"] or ">" in config["profile"]):
-        config["profile"] = "'" + config["profile"] + "'"
-
-    return config
+    return args
 
 
 def main(argv):
-    config = parse_args(argv)
+    # Parse commandline arguments
+    args = parse_args(argv)
 
-    workspace = config["workspace"]
-    folder = config["folder"]
-    queue = config["queue"]
-    workspaceName = config["workspaceName"]
-    ModelConfigName = config["ModelConfigName"]
-    dataName = config["dataName"]
-    poi = config["poi"]
-    snapshotName = config["snapshotName"]
-    loglevel = config["loglevel"]
-    profile = config["profile"]
-    fix = config["fix"]
-    strategy = config["strategy"]
-    eps = config["eps"]
-    precision = config["precision"]
-    scanRange = config["scanRange"]
-    bins = config["bins"]
-    pointsPerJob = config["pointsPerJob"]
+    if args.condor:
+        args.cluster = "condor"
+    elif args.lsf:
+        args.cluster = "lsf"
+        print("CERN lsf is not active anymore, consider using condor")
+        sys.exit(-1)
+    else:
+        print("Must specify cluster type: condor or lsf")
+        sys.exit(-1)
 
-    os.system("mkdir -vp bsub/%s" % folder)
-    os.system("mkdir -vp root-files/%s/scan" % folder)
+    args.home_folder = os.getcwd()
+    args.submission_folder = "{0}/{1}".format(args.cluster, args.folder)
+    args.result_folder = "root-files/{0}/scan".format(args.folder)
 
-    home_folder = os.getcwd()
+    # Create directories
+    os.system("mkdir -vp " + args.submission_folder)
+    os.system("mkdir -vp " + args.result_folder)
 
-    #  ROOT.loadCustom()
+    # Get POI values
+    poi_values = get_poi_values(args)
 
-    #  sys.exit(-1)
+    # Split in requested number of jobs and write corresponding job scripts
+    jobs = collect_jobs(args, poi_values)
 
-    ranges = scanRange.split(',')
-    allbins = bins.split(',')
+    # Submit jobs
+    if args.cluster == "lsf":
+        submit_lsf(args, jobs)
+    elif args.cluster == "condor":
+        submit_condor(args, jobs)
+
+
+def get_poi_values(args):
+    ranges = args.scanRange.split(',')
+    allbins = args.bins.split(',')
 
     allpoiVals = []
     for thisRange, thisbins in itertools.izip(ranges, allbins):
@@ -138,162 +135,162 @@ def main(argv):
             poiVals.add(high)
         allpoiVals.append(poiVals)
 
-    a = list(itertools.product(*allpoiVals))
+    poi_values = list(itertools.product(*allpoiVals))
 
-    totaljobs = 0
-    for thisA in a:
-        totaljobs += 1
-
-    submitArray = []
-    pointsInArray = 0
-    submittedalready = 0
-    for thisA in a:
-        myString = ",".join(thisA)
-        submitArray.append(myString)
-        pointsInArray += 1
-
-        if pointsInArray == int(pointsPerJob):
-            submitJob(pointsInArray=submitArray, folder=folder, workspace=workspace, poi=poi, workspaceName=workspaceName, ModelConfigName=ModelConfigName, dataName=dataName, snapshotName=snapshotName, loglevel=loglevel, profile=profile, strategy=strategy, fix=fix, eps=eps, precision=precision, home_folder=home_folder, queue=queue)
-            submittedalready += pointsInArray
-            pointsInArray = 0
-            submitArray = []
-
-        if pointsInArray == totaljobs-submittedalready and totaljobs-submittedalready > 0:
-            submitJob(pointsInArray=submitArray, folder=folder, workspace=workspace, poi=poi, workspaceName=workspaceName, ModelConfigName=ModelConfigName, dataName=dataName, snapshotName=snapshotName, loglevel=loglevel, profile=profile, strategy=strategy, fix=fix, eps=eps, precision=precision, home_folder=home_folder, queue=queue)
-            submittedalready += pointsInArray
+    return poi_values
 
 
-def submitJob(pointsInArray, folder, workspace, poi, workspaceName, ModelConfigName, dataName, snapshotName, loglevel, profile, strategy, fix, eps, precision, home_folder, queue):
-    pois = poi.split(',')
+def collect_jobs(args, poi_values):
+    submit_array = []
+    points_in_array = 0
+    submitted_already = 0
+    total_jobs = 0
+    jobs = str()
+
+    for this_val in poi_values:
+        total_jobs += 1
+
+    for this_val in poi_values:
+        myString = ",".join(this_val)
+        submit_array.append(myString)
+        points_in_array += 1
+
+        if points_in_array == int(args.pointsPerJob):
+            job = write_job(submit_array, args)
+            jobs += job + "\n"
+            submitted_already += points_in_array
+            points_in_array = 0
+            submit_array = []
+
+    if points_in_array == total_jobs - submitted_already and total_jobs - submitted_already > 0:
+        job = write_job(submit_array, args)
+        jobs += job + "\n"
+        submitted_already += points_in_array
+
+    return jobs
+
+
+def write_job(pointsInArray, args):
+    pois = args.poi.split(',')
     poiVal = pointsInArray[0]
     poiVals = poiVal.split(',')
 
-    bsubFileName = "bsub/" + folder + "/"
-    for thisPoi, thisPoiVal in itertools.izip(pois, poiVals):
-        bsubFileName += thisPoi + thisPoiVal
-    bsubFileName += ".sh"
+    command = get_command(pointsInArray, args)
 
-    bsubFile = open(bsubFileName, "w")
-    text = getJobDef(pointsInArray=pointsInArray, folder=folder, workspace=workspace, poi=poi, workspaceName=workspaceName, ModelConfigName=ModelConfigName, dataName=dataName, snapshotName=snapshotName, loglevel=loglevel, profile=profile, strategy=strategy, fix=fix, eps=eps, precision=precision, home_folder=home_folder, queue=queue)
-    bsubFile.write(text)
-    bsubFile.close()
-    os.system("chmod -R 775 bsub/" + folder)
-    command = "bsub < " + bsubFileName
-    print(command)
-    os.system(command)
+    if args.cluster == "lsf":
+        with open("share/lsf_submit.sub") as f:
+            directives = f.read()
+
+        replacedict = dict()
+        replacedict["POI"] = args.poi
+        replacedict["POIVAL"] = poiVal
+        replacedict["FOLDER"] = args.folder
+        replacedict["QUEUE"] = args.queue
+        replacedict["MAIL"] = args.mail
+        replacedict["POOL"] = args.pool
+        replacedict["MEM"] = args.mem
+        replacedict["SWAP"] = args.swap
+        replacedict["RMEM"] = args.rmem
+
+        directives = directives.format(**replacedict)
+    elif args.cluster == "condor":
+        directives = ""
+
+    with open("share/batchjob.sh") as f:
+        batchjob = f.read()
+
+    replacedict = dict()
+    replacedict["DIRECTIVES"] = directives
+    replacedict["FOLDER"] = args.folder
+    replacedict["HOME_FOLDER"] = args.home_folder
+    replacedict["COMMAND"] = command
+
+    batchjob = batchjob.format(**replacedict)
+
+    job_name = "scan_{0}_{1}".format(args.poi, poiVal)
+    batchjob_file = os.path.join(args.submission_folder, job_name + ".sh")
+
+    with open(batchjob_file, "w") as f:
+        f.write(batchjob)
+
+    if args.cluster == "lsf":
+        return batchjob_file
+    elif args.cluster == "condor":
+        return job_name
 
 
-def getJobDef(pointsInArray, folder, workspace, poi, workspaceName, ModelConfigName, dataName, snapshotName, loglevel, profile, strategy, fix, eps, precision, home_folder, queue):
-    print(pointsInArray)
-    pois = poi.split(',')
-    poiVal = pointsInArray[0]
-    # poiVals = poiVal.split(',')
-
+def get_command(vals, args):
     command = ""
-    for thisPoiVals in pointsInArray:
-        thisPoiVal = thisPoiVals.split(',')
-        command += "./bin/scan.exe --input %s" % (workspace)
 
-        if (poi != ""):
+    for thisPoiVals in vals:
+        thisPoiVal = thisPoiVals.split(',')
+
+        command += "./bin/scan.exe --input %s" % (args.workspace)
+
+        if (args.poi != ""):
             command += " --poi '"
-            for poi_tmp, val_tmp in itertools.izip(pois, thisPoiVal):
+            for poi_tmp, val_tmp in itertools.izip(args.poi.split(','), thisPoiVal):
                 command += ",%s[%s]" % (poi_tmp, val_tmp)
             command += "'"
-        if (workspaceName != ""):
-            command += " --workspace %s" % (workspaceName)
-        if (ModelConfigName != ""):
-            command += " --modelconfig %s" % (ModelConfigName)
-        if (dataName != ""):
-            command += " --data %s" % (dataName)
-        if (snapshotName != ""):
-            command += " --snapshot %s" % (snapshotName)
-        if (folder != ""):
-            command += " --folder %s" % (folder)
-        if (loglevel != ""):
-            command += " --loglevel %s" % (loglevel)
-        if (profile != ""):
-            command += " --profile %s" % (profile)
-        if (strategy != ""):
-            command += " --strategy %s" % (strategy)
-        if (fix != ""):
-            command += " --fix \"%s\"" % (fix)
-        if (eps != ""):
-            command += " --eps %s" % (eps)
-        if (precision != ""):
-            command += " --precision %s" % (precision)
-        command += ";\n"
+        if (args.workspaceName != ""):
+            command += " --workspace %s" % (args.workspaceName)
+        if (args.ModelConfigName != ""):
+            command += " --modelconfig %s" % (args.ModelConfigName)
+        if (args.dataName != ""):
+            command += " --data %s" % (args.dataName)
+        if (args.snapshotName != ""):
+            command += " --snapshot %s" % (args.snapshotName)
+        if (args.folder != ""):
+            command += " --folder %s" % (args.folder)
+        if (args.loglevel != ""):
+            command += " --loglevel %s" % (args.loglevel)
+        if (args.profile != ""):
+            command += " --profile %s" % (args.profile)
+        if (args.strategy != ""):
+            command += " --strategy %s" % (args.strategy)
+        if (args.fix != ""):
+            command += " --fix \"%s\"" % (args.fix)
+        if (args.eps != ""):
+            command += " --eps %s" % (args.eps)
+        if (args.precision != ""):
+            command += " --precision %s" % (args.precision)
+        command += ";\n    "
         command = command.replace("--poi ',", "--poi '")
+
+    return command[:-5]
+
+
+def submit_lsf(args, jobs):
+    for submission_script in jobs.split("\n"):
+        command = "bsub < " + submission_script
 
         print(command)
 
-    text = """
-#!/bin/bash
+        os.system(command)
 
-#BSUB -J scan_%s_%s
-#BSUB -o bsub/%s/stdout_%s_%s.out
-#BSUB -q %s
-#BSUB -u $USER@cern.ch
-#BSUB -R "select[pool>1000 && mem>8000 && swap>8000]"
-#BSUB -R "rusage[mem=2000]"
+def submit_condor(args, jobs):
+    submission_script = os.path.join(args.submission_folder, "scan.sub")
 
-WORKDIR=$TMPDIR/LSF_$LSB_JOBID
-HOMEDIR=%s
-OUTDIR=$HOMEDIR
-FOLDER=%s
+    with open("share/condor_submit.sub") as f:
+        text = f.read()
 
-stagein()
-{
-    uname -a
-    ulimit -S -s 20000
-    ulimit -Sc 0
-    ulimit -Hc 0
-    ulimit -c 0
-    ulimit -d unlimited
-    ulimit -f unlimited
-    ulimit -l unlimited
-    ulimit -n unlimited
-    ulimit -s unlimited
-    ulimit -t unlimited
-    mkdir -vp ${WORKDIR}
-    cd ${HOMEDIR} 2> /dev/null || { echo "The directory does not exist."; exit -1; }
+    replacedict = dict()
+    replacedict["RUN"] = os.path.join(args.submission_folder, "$(job)")
+    replacedict["MEM"] = args.mem
+    replacedict["MAXRUNTIME"] = args.time
+    replacedict["MAIL"] = args.mail
+    replacedict["JOBS"] = jobs[:-1]
 
-    echo Current folder is
-    pwd
-    ls -l
+    text = text.format(**replacedict)
 
-    # ATLAS environment
-    export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase;
-    echo ${ATLAS_LOCAL_ROOT_BASE}
-    alias setupATLAS='source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh';
-    setupATLAS
+    with open(submission_script, "w") as f:
+        f.write(text)
 
-    # LCG environment
-    #  lsetup "lcgenv -p LCG_88 x86_64-slc6-gcc62-opt ROOT";
-    lsetup "lcgenv -p LCG_93 x86_64-slc6-gcc62-opt ROOT";
+    command = "condor_submit " + submission_script
 
-    cd %s;
-}
+    print(command)
 
-runcode()
-{
-""" % (poi, poiVal, folder, poi, poiVal, queue, home_folder, folder, home_folder)
-
-    text += command
-    text += """
-}
-
-stageout()
-{
-    cd ${OUTDIR}; ls -l
-}
-
-stagein
-runcode
-stageout
-
-exit
-"""
-    return text
+    os.system(command)
 
 
 if __name__ == '__main__':
