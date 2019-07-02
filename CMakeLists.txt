@@ -61,11 +61,11 @@ find_package(Boost 1.60 COMPONENTS REQUIRED program_options log log_setup system
 include(cmake/Modules/YamlCpp.cmake)
 
 # Eigen
-find_package(Eigen 3.0 REQUIRED)
-include_directories(${Eigen_INCLUDE_DIRS})
+include(cmake/Modules/Eigen.cmake)
 
 # Includes
-set(PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIRS} ${YAMLCPP_INCLUDE_DIR})
+set(PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+
 if(NOT DEFINED ENV{AtlasProject}) # not defined when inside ATLAS environment
   include(${ROOT_USE_FILE})
 endif()
@@ -84,7 +84,7 @@ ROOT_GENERATE_DICTIONARY(G__StatisticsTools MODULE utils.hxx RooMultiVarGaussian
 set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES})
 add_library(StatisticsTools SHARED utils.cxx RooMultiVarGaussianHighPrecision.cxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx ${sources})
 target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
-add_dependencies(StatisticsTools YAML-CPP)
+add_dependencies(StatisticsTools YAML-CPP Eigen)
 
 # Create a main program using the library
 add_executable(${EXECUTABLE_FIT} ${SOURCE_FILES_FIT})
