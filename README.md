@@ -1,26 +1,38 @@
 # lxplus environment
 
-Setup the basic environment as follows:
+Setup the ATLAS environment:
 
 ~~~~
 cd;
-lsetup "lcgenv -p LCG_88 x86_64-slc6-gcc62-opt ROOT";
-export CC=/cvmfs/sft.cern.ch/lcg/releases/LCG_88/gcc/6.2.0/x86_64-slc6/bin/gcc; export CXX=/cvmfs/sft.cern.ch/lcg/releases/LCG_88/gcc/6.2.0/x86_64-slc6/bin/g++;
+setupATLAS;
 ~~~~
 
-Setup `Eigen`:
+Setup `ROOT`, `eigen` and `yaml-cpp` via `LCG` releases:
 
 ~~~~
-lsetup "lcgenv -p LCG_88 x86_64-slc6-gcc62-opt eigen";
+cd;
+lsetup "lcgenv -p LCG_93 x86_64-centos7-gcc62-opt ROOT";
+lsetup "lcgenv -p LCG_93 x86_64-centos7-gcc62-opt eigen";
+lsetup "lcgenv -p LCG_93 x86_64-centos7-gcc62-opt yamlcpp";
+export CC=/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/bin/gcc;
+export CXX=/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/bin/g++;
+~~~~
+
+Setup a recent `cmake` version:
+
+~~~~
+cd;
+lsetup cmake;
 ~~~~
 
 # Compiling tools
 
 ~~~~
+cd StatisticsTools;
 mkdir build;
 cd build;
-cmake .. -DBOOST_ROOT=/cvmfs/sft.cern.ch/lcg/releases/LCG_88/Boost/1.62.0/x86_64-slc6-gcc62-opt -DBOOST_INCLUDEDIR=/cvmfs/sft.cern.ch/lcg/releases/LCG_88/Boost/1.62.0/x86_64-slc6-gcc62-opt/include/boost-1_62 -DBoost_LIBRARY_DIRS=/cvmfs/sft.cern.ch/lcg/releases/LCG_88/Boost/1.62.0/x86_64-slc6-gcc62-opt/lib;
-make;
+cmake .. -DBOOST_ROOT=/cvmfs/sft.cern.ch/lcg/releases/LCG_93/Boost/1.66.0/x86_64-centos7-gcc62-opt -DBOOST_INCLUDEDIR=/cvmfs/sft.cern.ch/lcg/releases/LCG_93/Boost/1.66.0/x86_64-centos7-gcc62-opt/include/boost -DBoost_LIBRARY_DIRS=/cvmfs/sft.cern.ch/lcg/releases/LCG_93/Boost/1.66.0/x86_64-centos7-gcc62-opt/lib;
+make VERBOSE=1;
 ~~~~
 
 # Running tools
