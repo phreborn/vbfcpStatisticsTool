@@ -13,7 +13,7 @@
 # you must set the YAMLCPP_USE_STATIC_LIBS variable to TRUE before calling find_package(YamlCpp ...)
 
 set( _ignorePathBackup ${CMAKE_SYSTEM_IGNORE_PATH} )
-set( CMAKE_SYSTEM_IGNORE_PATH /usr/include /usr/bin /usr/lib /usr/lib32 /usr/lib64 )
+set( CMAKE_SYSTEM_IGNORE_PATH /usr/include /usr/bin /usr/lib /usr/lib32 /usr/lib64 /lib64 /lib )
 
 # attempt to find static library first if this is set
 if(YAMLCPP_USE_STATIC_LIBS)
@@ -33,12 +33,12 @@ find_path(YAMLCPP_INCLUDE_DIR
   NAMES yaml-cpp/yaml.h
   PATH_SUFFIXES include
   PATHS
-  ${PROJECT_SOURCE_DIR}/dependencies/yaml-cpp-0.5.1/include
-  ${PROJECT_SOURCE_DIR}/../external/yaml-cpp/include
-  ${PROJECT_SOURCE_DIR}/../../yaml-cpp/include
+  ${PROJECT_SOURCE_DIR}/dependencies/yaml-cpp-0.5.1/include/
+  ${PROJECT_SOURCE_DIR}/../external/yaml-cpp/include/
+  ${PROJECT_SOURCE_DIR}/../../yaml-cpp/include/
   ~/Library/Frameworks/yaml-cpp/include/
   /Library/Frameworks/yaml-cpp/include/
-  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/x86_64-slc6-gcc62-opt/include/
+  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/x86_64-centos7-gcc62-opt/include/
   /sw/yaml-cpp/         # Fink
   /opt/local/yaml-cpp/  # DarwinPorts
   /opt/csw/yaml-cpp/    # Blastwave
@@ -46,7 +46,7 @@ find_path(YAMLCPP_INCLUDE_DIR
 
 # find the release yaml-cpp library
 find_library(YAMLCPP_LIBRARY_RELEASE
-  NAMES ${YAMLCPP_STATIC} yaml-cpp libyaml-cppmd.lib
+  NAMES ${YAMLCPP_STATIC} yaml-cpp libyaml-cpp.so libyaml-cppmd.lib
   PATH_SUFFIXES lib64 lib Release RelWithDebInfo
   PATHS
   ${PROJECT_SOURCE_DIR}/../../yaml-cpp/
@@ -57,7 +57,7 @@ find_library(YAMLCPP_LIBRARY_RELEASE
   ${PROJECT_SOURCE_DIR}/../external/yaml-cpp/build
   ~/Library/Frameworks
   /Library/Frameworks
-  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/x86_64-slc6-gcc62-opt/lib/
+  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/x86_64-centos7-gcc62-opt/lib
   /sw
   /opt/local
   /opt/csw
@@ -65,7 +65,7 @@ find_library(YAMLCPP_LIBRARY_RELEASE
 
 # find the debug yaml-cpp library
 find_library(YAMLCPP_LIBRARY_DEBUG
-  NAMES ${YAMLCPP_STATIC_DEBUG} yaml-cpp-dbg libyaml-cppmdd.lib
+  NAMES ${YAMLCPP_STATIC_DEBUG} yaml-cpp-dbg libyaml-cpp-dbg.so libyaml-cppmdd.lib
   PATH_SUFFIXES lib64 lib Debug
   PATHS
   ${PROJECT_SOURCE_DIR}/../../yaml-cpp/
@@ -76,7 +76,7 @@ find_library(YAMLCPP_LIBRARY_DEBUG
   ${PROJECT_SOURCE_DIR}/../external/yaml-cpp/build
   ~/Library/Frameworks
   /Library/Frameworks
-  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/x86_64-slc6-gcc62-opt/lib/
+  /cvmfs/sft.cern.ch/lcg/releases/LCG_93/yamlcpp/0.5.1/x86_64-centos7-gcc62-opt/lib
   /sw
   /opt/local
   /opt/csw
