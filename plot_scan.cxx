@@ -105,7 +105,7 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis = 
             vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > map_overlay2folder2poi2nuis = vector<pair<string, map<string, map< vector<double>, map<string, double> > > > >(),
             double x_lo = -3.0, double x_hi = 3.0, double y_lo = -3.0, double y_hi = 3.0,
             vector<string> color = vector<string>(), vector<int> style = vector<int>(), vector<string> legend = vector<string>(), vector<string> axis_label = vector<string>(),
-            string label = "", string luminosity = "");
+            string label = "", string luminosity = "", vector<double> reference = vector<double>(), string reference_label = "");
 TH2D* IncreaseResolutionAndSmooth(TH2D* h, int xbins, double xlo, double xhi, int ybins, double ylo, double yhi);
 map<int, deque<TGraph*> > GetContours(TH2D* h);
 TGraph* GetBestFit(TH2D* h);
@@ -127,25 +127,29 @@ int main(int argc, char **argv) {
   vector<double> y_range    = {};
   string label              = "Internal";
   string luminosity         = "#sqrt{s} = 13 TeV, 36.1 fb^{-1}";
+  vector<double> reference  = {1, 1};
+  string reference_label    = "";
   string loglevel           = "INFO";
 
   using namespace boost;
   namespace po = boost::program_options;
   po::options_description desc( "Program options" );
   desc.add_options()
-    ( "help        , h"                                                            , "Print this help message")
-    ( "input"      , po::value<vector<string>> ( &input )->multitoken()            , "Path to input." )
-    ( "color"      , po::value<vector<string>> ( &color )->multitoken()            , "Line color." )
-    ( "style"      , po::value<vector<int>> ( &style )->multitoken()               , "Line style." )
-    ( "legend"     , po::value<vector<string>> ( &legend )->multitoken()           , "Legend text." )
-    ( "poi"        , po::value<vector<string>> ( &poi )->multitoken()              , "Parameter of interest." )
-    ( "axis_label" , po::value<vector<string>> ( &axis_label )->multitoken()       , "Axis label." )
-    ( "nuis"       , po::value<vector<string>> ( &nuis )->multitoken()             , "Nuisance parameters." )
-    ( "x"          , po::value<vector<double>> ( &x_range )->multitoken()          , "x-axis range." )
-    ( "y"          , po::value<vector<double>> ( &y_range )->multitoken()          , "y-axis range." )
-    ( "label"      , po::value<string>( &label )->default_value( label )           , "Internal, Preliminary, etc." )
-    ( "luminosity" , po::value<string>( &luminosity )->default_value( luminosity ) , "Luminosity." )
-    ( "loglevel"   , po::value<string>( &loglevel )->default_value( loglevel )     , "Loglevel." )
+    ( "help             , h"                                                                      , "Print this help message")
+    ( "input"           , po::value<vector<string>> ( &input )->multitoken()                      , "Path to input." )
+    ( "color"           , po::value<vector<string>> ( &color )->multitoken()                      , "Line color." )
+    ( "style"           , po::value<vector<int>> ( &style )->multitoken()                         , "Line style." )
+    ( "legend"          , po::value<vector<string>> ( &legend )->multitoken()                     , "Legend text." )
+    ( "poi"             , po::value<vector<string>> ( &poi )->multitoken()                        , "Parameter of interest." )
+    ( "axis_label"      , po::value<vector<string>> ( &axis_label )->multitoken()                 , "Axis label." )
+    ( "nuis"            , po::value<vector<string>> ( &nuis )->multitoken()                       , "Nuisance parameters." )
+    ( "x"               , po::value<vector<double>> ( &x_range )->multitoken()                    , "x-axis range." )
+    ( "y"               , po::value<vector<double>> ( &y_range )->multitoken()                    , "y-axis range." )
+    ( "label"           , po::value<string>( &label )->default_value( label )                     , "Internal, Preliminary , etc." )
+    ( "luminosity"      , po::value<string>( &luminosity )->default_value( luminosity )           , "Luminosity." )
+    ( "reference"       , po::value<vector<double>> ( &reference )->multitoken()                  , "Nominal." )
+    ( "reference_label" , po::value<string>( &reference_label )->default_value( reference_label ) , "Nominal label." )
+    ( "loglevel"        , po::value<string>( &loglevel )->default_value( loglevel )               , "Loglevel." )
     ;
 
   po::variables_map vm0;
@@ -192,7 +196,7 @@ int main(int argc, char **argv) {
   if (poi.size() == 1) {
     plot1D(input, poi[0], nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity);
   } else if (poi.size() == 2) {
-    plot2D(input, poi, nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity);
+    plot2D(input, poi, nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity, reference, reference_label);
   } else {
     LOG(logERROR) << "Plotting for multiple pois not yet implemented.";
   }
@@ -1047,7 +1051,7 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
             vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > map_overlay2folder2poi2nuis,
             double x_lo, double x_hi, double y_lo, double y_hi,
             vector<string> color, vector<int> style, vector<string> legend, vector<string> axis_label,
-            string label, string luminosity)
+            string label, string luminosity, vector<double> reference, string reference_label)
 {
   LOG(logINFO) << "Plotting 2D likelihood scan.";
 
@@ -1544,10 +1548,10 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
   Double_t x0_leg[n_leg], y0_leg[n_leg];
   Double_t x1_leg[n_leg], y1_leg[n_leg];
 
-  x0_leg[0] = 1;
-  y0_leg[0] = 1;
-  x1_leg[0] = 1;
-  y1_leg[0] = 1;
+  x0_leg[0] = reference[0];
+  y0_leg[0] = reference[1];
+  x1_leg[0] = reference[0];
+  y1_leg[0] = reference[1];
 
   TGraph* g0_leg = new TGraph(n_leg, x0_leg, y0_leg);
   TGraph* g1_leg = new TGraph(n_leg, x1_leg, y1_leg);
@@ -1564,12 +1568,15 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
   g1_leg->SetLineWidth(3);
   g1_leg->SetMarkerSize(2.0);
 
-  leg_general->AddEntry(g0_leg, "SM", "P");
+
+  if (reference_label != "") {
+    leg_general->AddEntry(g0_leg, reference_label.c_str(), "P");
+      g0_leg->Draw("PSAME");
+  }
   leg_general->AddEntry(g0_leg, "68% CL", "L");
   leg_general->AddEntry(g1_leg, "Best fit", "P");
   leg_general->AddEntry(g1_leg, "95% CL", "L");
 
-  g0_leg->Draw("PSAME");
   leg_general->Draw("F");
 
   // Save the canvas
