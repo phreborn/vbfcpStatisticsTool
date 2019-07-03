@@ -44,6 +44,21 @@ make VERBOSE=1;
 ./bin/pulls.exe --input input.root --workspace combined --data asimovData --poi mu --parameter alpha_sys
 ~~~~
 
+# Plotting output
+
+## Likelihood scan
+
+### 1D
+
+~~~
+./bin/plot_scan.exe --input "root-files/scan/scan" --poi mu --x 0.0 2.0 --y 0.0 20.0 --color "#0000ff" --style 1 --legend myScan --axis_label mu
+~~~
+
+### 2D
+
+~~~
+./bin/plot_scan.exe --input "root-files/scan/scan" --poi mu1 mu2 --x 0.0 2.0 --y -5.0 5.0 --color "#0000ff" --style 1 --legend myScan --axis_label mu1 mu2
+~~~
 # Submitting to lxbatch (condor)
 
 ## Likelihood scan
