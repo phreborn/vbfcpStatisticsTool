@@ -40,7 +40,7 @@
 
 #include "log.hxx"
 #include "utils.hxx"
-#include "TextTable.hxx"
+#include "cpp-text-table/TextTable.h"
 
 #include "atlasrootstyle/AtlasUtils.h"
 #include "atlasrootstyle/AtlasLabels.h"

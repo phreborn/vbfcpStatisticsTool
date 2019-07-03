@@ -2,3 +2,7 @@
 	path = atlasrootstyle
 	url = https://gitlab.cern.ch/atlas-publications-committee/atlasrootstyle.git
 	branch = master
+[submodule "include/cpp-text-table"]
+	path = include/cpp-text-table
+	url = https://github.com/haarcuba/cpp-text-table.git
+	branch = master

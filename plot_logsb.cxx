@@ -51,7 +51,7 @@
 #include "ExtendedModel.hxx"
 #include "RooMultiVarGaussianHighPrecision.h"
 
-#include "TextTable.hxx"
+#include "cpp-text-table/TextTable.h"
 #include "log.hxx"
 #include "utils.hxx"
 
