@@ -11,26 +11,26 @@ if(NOT DEFINED ENV{AtlasProject}) # not needed when inside ATLAS environment
   set(CMAKE_INSTALL_LIBDIR ${PROJECT_SOURCE_DIR}/lib)
 endif()
 
-set(SOURCE_FILES_FIT fit.cxx)
-set(EXECUTABLE_FIT fit.exe)
+set(SOURCE_FILES_BREAKDOWN run_breakdown.cxx)
+set(EXECUTABLE_BREAKDOWN run_breakdown.exe)
 
-set(SOURCE_FILES_PULLS pulls.cxx)
-set(EXECUTABLE_PULLS pulls.exe)
+set(SOURCE_FILES_FIT run_fit.cxx)
+set(EXECUTABLE_FIT run_fit.exe)
+
+set(SOURCE_FILES_PULLS run_pulls.cxx)
+set(EXECUTABLE_PULLS run_pulls.exe)
+
+set(SOURCE_FILES_SCAN run_scan.cxx)
+set(EXECUTABLE_SCAN run_scan.exe)
+
+set(SOURCE_FILES_PLOT_LOGSB plot_logsb.cxx)
+set(EXECUTABLE_PLOT_LOGSB plot_logsb.exe)
 
 set(SOURCE_FILES_PLOT_PULLS plot_pulls.cxx)
 set(EXECUTABLE_PLOT_PULLS plot_pulls.exe)
 
-set(SOURCE_FILES_SCAN scan.cxx)
-set(EXECUTABLE_SCAN scan.exe)
-
 set(SOURCE_FILES_PLOT_SCAN plot_scan.cxx)
 set(EXECUTABLE_PLOT_SCAN plot_scan.exe)
-
-set(SOURCE_FILES_BREAKDOWN breakdown.cxx)
-set(EXECUTABLE_BREAKDOWN breakdown.exe)
-
-set(SOURCE_FILES_PLOT_LOGSB plot_logsb.cxx)
-set(EXECUTABLE_PLOT_LOGSB plot_logsb.exe)
 
 set(SOURCE_FILES_LIMIT compute_limit_from_scan.cxx)
 set(EXECUTABLE_LIMIT compute_limit_from_scan.exe)

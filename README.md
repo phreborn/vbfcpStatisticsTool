@@ -35,13 +35,13 @@ make VERBOSE=1;
 ## Quick fit
 
 ~~~~
-./bin/fit.exe --input input.root --workspace combined --data asimovData --poi mu
+./bin/run_fit.exe --input input.root --workspace combined --data asimovData --poi mu
 ~~~~
 
 ## Nuisance impact (correlation)
 
 ~~~~
-./bin/pulls.exe --input input.root --workspace combined --data asimovData --poi mu --parameter alpha_sys
+./bin/run_pulls.exe --input input.root --workspace combined --data asimovData --poi mu --parameter alpha_sys
 ~~~~
 
 # Plotting output

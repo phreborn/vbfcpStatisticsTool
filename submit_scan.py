@@ -225,7 +225,7 @@ def get_command(vals, args):
     for thisPoiVals in vals:
         thisPoiVal = thisPoiVals.split(',')
 
-        command += "./bin/scan.exe --input %s" % (args.workspace)
+        command += "./bin/run_scan.exe --input %s" % (args.workspace)
 
         if (args.poi != ""):
             command += " --poi '"

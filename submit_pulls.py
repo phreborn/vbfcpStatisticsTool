@@ -214,7 +214,7 @@ def get_command(parameters, args):
 
     for parameter in parameters:
 
-        command += "./bin/pulls.exe --input %s" % (args.workspace)
+        command += "./bin/run_pulls.exe --input %s" % (args.workspace)
 
         if (args.poi != ""):
             command += " --poi %s" % (args.poi)
