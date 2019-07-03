@@ -1036,6 +1036,7 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis,
   save(saveName.str(), "eps", c1);
   save(saveName.str(), "pdf", c1);
   save(saveName.str(), "C", c1);
+  save(saveName.str(), "png", c1);
 }
 
 // ____________________________________________________________________________|__________
@@ -1580,6 +1581,7 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
   save(saveName.str(), "eps", c1);
   save(saveName.str(), "pdf", c1);
   save(saveName.str(), "C", c1);
+  save(saveName.str(), "png", c1);
 }
 
 

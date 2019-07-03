@@ -2,3 +2,8 @@ lib/*
 bin/*
 build/*
 .vscode/*
+root-files/*
+pdf-files/*
+eps-files/*
+C-files/*
+png-files/*
