@@ -63,5 +63,5 @@ python submit_scan.py input.root --workspaceName combined --data asimovData --po
 ## Nuisance parameter impact (correlation between POI and NP)
 
 ~~~~
-python submit_pulls.py input.root --workspaceName combined --data asimovData --poi mu --folder ranking
+python submit_pulls.py input.root --workspaceName combined --data asimovData --poi mu --folder ranking --parametersPerJob 2 --condor
 ~~~~
