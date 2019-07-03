@@ -41,9 +41,9 @@
 #include "log.hxx"
 #include "utils.hxx"
 
-#include "atlasstyle-00-03-05/AtlasUtils.h"
-#include "atlasstyle-00-03-05/AtlasLabels.h"
-#include "atlasstyle-00-03-05/AtlasStyle.h"
+#include "atlasrootstyle/AtlasUtils.h"
+#include "atlasrootstyle/AtlasLabels.h"
+#include "atlasrootstyle/AtlasStyle.h"
 
 #include <iomanip>
 #include <stdlib.h>

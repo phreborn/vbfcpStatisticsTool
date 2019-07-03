@@ -73,9 +73,9 @@ endif()
 include_directories(${PROJECT_INCLUDE_DIRS})
 
 # ATLAS style
-include_directories(${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/)
-file(GLOB sources RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.C)
-file(GLOB headers RELATIVE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/atlasstyle-00-03-05/*.h)
+include_directories(${PROJECT_SOURCE_DIR}/atlasrootstyle/)
+set(sources atlasrootstyle/AtlasLabels.C atlasrootstyle/AtlasStyle.C atlasrootstyle/AtlasUtils.C)
+set(headers atlasrootstyle/AtlasLabels.h atlasrootstyle/AtlasStyle.h atlasrootstyle/AtlasUtils.h)
 
 # Generate dictionary
 ROOT_GENERATE_DICTIONARY(G__StatisticsTools MODULE utils.hxx RooMultiVarGaussianHighPrecision.h ExtendedModel.hxx ExtendedMinimizer.hxx ${headers} LINKDEF LinkDef.h)

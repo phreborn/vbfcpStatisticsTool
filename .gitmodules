@@ -1,0 +1,4 @@
+[submodule "atlasrootstyle"]
+	path = atlasrootstyle
+	url = https://gitlab.cern.ch/atlas-publications-committee/atlasrootstyle.git
+	branch = master

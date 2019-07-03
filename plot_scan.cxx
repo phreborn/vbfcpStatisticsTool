@@ -68,9 +68,9 @@
 #include "log.hxx"
 #include "utils.hxx"
 
-#include "atlasstyle-00-03-05/AtlasUtils.h"
-#include "atlasstyle-00-03-05/AtlasLabels.h"
-#include "atlasstyle-00-03-05/AtlasStyle.h"
+#include "atlasrootstyle/AtlasUtils.h"
+#include "atlasrootstyle/AtlasLabels.h"
+#include "atlasrootstyle/AtlasStyle.h"
 
 #include "boost/program_options.hpp"
 #include "boost/program_options/cmdline.hpp"
@@ -958,7 +958,7 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis,
   axis0->SetTitleFont(42);
   axis0->SetLabelSize(1.0*hist_boundaries->GetXaxis()->GetLabelSize());
   axis0->SetLineColor(kBlack);
-  axis0->SetTitleOffset(1.0);
+  // axis0->SetTitleOffset(1.0);
   axis0->SetTitle(hist_boundaries->GetXaxis()->GetTitle());
   // axis0->SetTitle("");
   hist_boundaries->GetXaxis()->SetLabelSize(0);
@@ -1471,7 +1471,7 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
   axis0->SetTitleFont(42);
   axis0->SetLabelSize(1.0*hist_boundaries->GetXaxis()->GetLabelSize());
   axis0->SetLineColor(kBlack);
-  axis0->SetTitleOffset(1.0);
+  // axis0->SetTitleOffset(1.0);
   axis0->SetTitle(hist_boundaries->GetXaxis()->GetTitle());
   // axis0->SetTitle("");
   hist_boundaries->GetXaxis()->SetLabelSize(0);
