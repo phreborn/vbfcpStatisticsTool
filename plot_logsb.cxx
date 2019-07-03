@@ -1290,11 +1290,9 @@ int main(int argc, char **argv) {
   }
 
   // save plot
-  c->SaveAs("log_sb.pdf");
-  c->SaveAs("log_sb.C");
-  c->SaveAs("log_sb.root");
-  c->SaveAs("log_sb.eps");
-  c->SaveAs("log_sb.png");
+  stringstream saveName;
+  saveName << "log_sb";
+  save(saveName.str(), {"eps", "pdf", "png", "C"}, c);
 
   PrintResourcesUsed(thistime);
 }

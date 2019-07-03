@@ -10,6 +10,7 @@
 #include "TSystem.h"
 #include "TMath.h"
 #include "TAxis.h"
+#include "TCanvas.h"
 #include "TGraphAsymmErrors.h"
 
 #include "RooProdPdf.h"
@@ -54,6 +55,19 @@ extern void loadCustom() {
     if (boost::filesystem::is_regular_file(fname) && std::find(ext.begin(), ext.end(), it->path().extension()) != ext.end()) {
       gSystem->CompileMacro(fname.c_str(), "k");
     }
+  }
+}
+
+// _____________________________________________________________________________
+// Save canvas
+void save(string baseName, vector<string> type, TCanvas* c1) {
+  system("mkdir -vp figures");
+
+  for (auto t : type) {
+    stringstream saveName;
+    saveName << "figures/" << baseName << "." << t;
+    LOG(logINFO) << "Save output as " << saveName.str();
+    c1->SaveAs(saveName.str().c_str());
   }
 }
 

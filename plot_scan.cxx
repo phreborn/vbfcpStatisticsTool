@@ -87,7 +87,6 @@ using namespace RooStats;
 
 // _____________________________________________________________________________
 // Declarations of functions used in this file
-void save(string baseName, string type, TCanvas* c1);
 void readFiles(vector<string> filenames, vector<string> poinames, vector<string> nuis,
                vector<pair<string, map<string, map< vector<double>, double > > > > &map_overlay2folder2poi2nll,
                vector<pair<string, map<string, map< vector<double>, int > > > > &map_overlay2folder2poi2status,
@@ -203,15 +202,6 @@ int main(int argc, char **argv) {
 
   // Finish plotting
   PrintResourcesUsed(thistime);
-}
-
-// _____________________________________________________________________________
-// Save canvas
-void save(string baseName, string type, TCanvas* c1) {
-  system(("mkdir -vp " + type + "-files").c_str());
-  stringstream saveName;
-  saveName << type << "-files/" << baseName << "." << type;
-  c1->SaveAs(saveName.str().c_str());
 }
 
 // _____________________________________________________________________________
@@ -1037,10 +1027,7 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis,
 
   stringstream saveName;
   saveName << "scan_" << poi;
-  save(saveName.str(), "eps", c1);
-  save(saveName.str(), "pdf", c1);
-  save(saveName.str(), "C", c1);
-  save(saveName.str(), "png", c1);
+  save(saveName.str(), {"eps", "pdf", "png", "C"}, c1);
 }
 
 // ____________________________________________________________________________|__________
@@ -1585,10 +1572,7 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
 
   stringstream saveName;
   saveName << "scan_" << poi[0] << "_" << poi[1];
-  save(saveName.str(), "eps", c1);
-  save(saveName.str(), "pdf", c1);
-  save(saveName.str(), "C", c1);
-  save(saveName.str(), "png", c1);
+  save(saveName.str(), {"eps", "pdf", "png", "C"}, c1);
 }
 
 

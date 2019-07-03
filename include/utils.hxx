@@ -46,6 +46,7 @@ int GetThreeDigits( double error );
 int GetNSigDigits( int threeDigits );
 double frexp10( double x, int* exp );
 double FormatValue( double value, int exponent, int nDigits, int extraRound );
+void save(string baseName, vector<string> type, TCanvas* c1);
 
 // _____________________________________________________________________________
 // Timer for benchmarks, see

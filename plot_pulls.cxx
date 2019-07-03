@@ -1585,17 +1585,10 @@ int main(int argc, char **argv) {
   std::system(("rm -f " + cardName + "/tmp.root").c_str());
 
   // Save the plot
-  stringstream baseName;
-  // baseName << cardName << "_" << poiname << "_rank_" << setfill('0') << setw(4) << firstParameter + 1 << "_to_" << setfill('0') << setw(4) << firstParameter + showTopParameters;
-  baseName << "ranking_" << poiname << "_rank_" << setfill('0') << setw(4) << firstParameter + 1 << "_to_" << setfill('0') << setw(4) << firstParameter + showTopParameters;
-
-  string type = "pdf";
-  std::system(("mkdir -vp " + type + "-files").c_str());
-
   stringstream saveName;
-  saveName << type << "-files/" << baseName.str() << "." << type;
-
-  c1->SaveAs(saveName.str().c_str());
+  // saveName << cardName << "_" << poiname << "_rank_" << setfill('0') << setw(4) << firstParameter + 1 << "_to_" << setfill('0') << setw(4) << firstParameter + showTopParameters;
+  saveName << "ranking_" << poiname << "_rank_" << setfill('0') << setw(4) << firstParameter + 1 << "_to_" << setfill('0') << setw(4) << firstParameter + showTopParameters;
+  save(saveName.str(), {"eps", "pdf", "png", "C"}, c1);
 
   // Finish plotting
   PrintResourcesUsed(thistime);
