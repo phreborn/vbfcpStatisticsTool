@@ -6,7 +6,7 @@ Setup the ATLAS environment:
 setupATLAS;
 ~~~~
 
-Setup `ROOT`, `eigen` and `yaml-cpp` via `LCG` releases:
+Setup `ROOT` via an `LCG` release:
 
 ~~~~
 lsetup "lcgenv -p LCG_93 x86_64-centos7-gcc62-opt ROOT";
