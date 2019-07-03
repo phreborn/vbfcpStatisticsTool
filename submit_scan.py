@@ -28,7 +28,7 @@ except Exception:
 
 
 __author__ = "Stefan Gadatsch"
-__credits__ = ["Stefan Gadatsch"]
+__credits__ = ["Stefan Gadatsch", "Tim Wolf"]
 __version__ = "0.0.1"
 __maintainer__ = "Stefan Gadatsch"
 __email__ = "stefan.gadatsch@cern.ch"
@@ -267,6 +267,7 @@ def submit_lsf(args, jobs):
         print(command)
 
         os.system(command)
+
 
 def submit_condor(args, jobs):
     submission_script = os.path.join(args.submission_folder, "scan.sub")
