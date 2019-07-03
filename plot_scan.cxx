@@ -21,6 +21,7 @@
 #include "TColor.h"
 #include "TFile.h"
 #include "TGaxis.h"
+#include "TGraph2D.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1D.h"
 #include "TH2.h"
@@ -29,6 +30,7 @@
 #include "TLegend.h"
 #include "TLine.h"
 #include "TList.h"
+#include "TMultiGraph.h"
 #include "TStopwatch.h"
 #include "TStyle.h"
 #include "TSystem.h"
@@ -37,7 +39,6 @@
 #include "TTime.h"
 #include "TTree.h"
 #include "TTreeFormula.h"
-#include "TMultiGraph.h"
 
 #include "Math/MinimizerOptions.h"
 
@@ -45,10 +46,12 @@
 #include "RooAddPdf.h"
 #include "RooArgSet.h"
 #include "RooBifurGauss.h"
+#include "RooDataHist.h"
 #include "RooDataSet.h"
 #include "RooFitResult.h"
 #include "RooGamma.h"
 #include "RooGaussian.h"
+#include "RooHistFunc.h"
 #include "RooLognormal.h"
 #include "RooMinimizer.h"
 #include "RooNLLVar.h"
@@ -96,6 +99,16 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis = vector<s
             double x_lo = -3.0, double x_hi = 3.0, double y_lo = 0.0, double y_hi = 10.0,
             vector<string> color = vector<string>(), vector<int> style = vector<int>(), vector<string> legend = vector<string>(), vector<string> axis_label = vector<string>(),
             string label = "", string luminosity = "", bool twoStepInterpolation=false);
+void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis = vector<string>(),
+            vector<pair<string, map<string, map< vector<double>, double > > > > map_overlay2folder2poi2nll = vector<pair<string, map<string, map< vector<double>, double > > > >(),
+            vector<pair<string, map<string, map< vector<double>, int > > > > map_overlay2folder2poi2status = vector<pair<string, map<string, map< vector<double>, int > > > >(),
+            vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > map_overlay2folder2poi2nuis = vector<pair<string, map<string, map< vector<double>, map<string, double> > > > >(),
+            double x_lo = -3.0, double x_hi = 3.0, double y_lo = -3.0, double y_hi = 3.0,
+            vector<string> color = vector<string>(), vector<int> style = vector<int>(), vector<string> legend = vector<string>(), vector<string> axis_label = vector<string>(),
+            string label = "", string luminosity = "");
+TH2D* IncreaseResolutionAndSmooth(TH2D* h, int xbins, double xlo, double xhi, int ybins, double ylo, double yhi);
+map<int, deque<TGraph*> > GetContours(TH2D* h);
+TGraph* GetBestFit(TH2D* h);
 
 // _____________________________________________________________________________
 // Main routine
@@ -178,6 +191,8 @@ int main(int argc, char **argv) {
   // Plotting
   if (poi.size() == 1) {
     plot1D(input, poi[0], nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity);
+  } else if (poi.size() == 2) {
+    plot2D(input, poi, nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity);
   } else {
     LOG(logERROR) << "Plotting for multiple pois not yet implemented.";
   }
@@ -201,6 +216,8 @@ void readFiles(vector<string> filenames, vector<string> poinames, vector<string>
                vector<pair<string, map<string, map< vector<double>, double > > > > &map_overlay2folder2poi2nll,
                vector<pair<string, map<string, map< vector<double>, int > > > > &map_overlay2folder2poi2status,
                vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > &map_overlay2folder2poi2nuis) {
+  LOG(logINFO) << "Reading files.";
+
   for (auto filename : filenames) {
     vector<string> folders;
     boost::split(folders, filename, boost::is_any_of(";"));
@@ -225,9 +242,11 @@ void readFiles(vector<string> filenames, vector<string> poinames, vector<string>
         {
           if(boost::filesystem::is_regular_file(fname))
           {
+            LOG(logDEBUG) << "On file " << fname;
+
             TFile* f = TFile::Open(fname.c_str());
             if (!f) {
-              cout << "Could not open file " << fname << endl;
+              LOG(logERROR) << "Could not open file " << fname;
               exit(-1);
             }
 
@@ -318,6 +337,8 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis,
             vector<string> color, vector<int> style, vector<string> legend, vector<string> axis_label,
             string label, string luminosity, bool twoStepInterpolation)
 {
+  LOG(logINFO) << "Plotting 1D likelihood scan.";
+
   Color_t color_1sigma  = kRed+1;
   Color_t color_2sigma  = kGreen+2;
   Color_t color_3sigma  = kCyan-6;
@@ -1015,4 +1036,719 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis,
   save(saveName.str(), "eps", c1);
   save(saveName.str(), "pdf", c1);
   save(saveName.str(), "C", c1);
+}
+
+// ____________________________________________________________________________|__________
+// Plot 2D profile likelihood scan
+void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
+            vector<pair<string, map<string, map< vector<double>, double > > > > map_overlay2folder2poi2nll,
+            vector<pair<string, map<string, map< vector<double>, int > > > > map_overlay2folder2poi2status,
+            vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > map_overlay2folder2poi2nuis,
+            double x_lo, double x_hi, double y_lo, double y_hi,
+            vector<string> color, vector<int> style, vector<string> legend, vector<string> axis_label,
+            string label, string luminosity)
+{
+  LOG(logINFO) << "Plotting 2D likelihood scan.";
+
+  map<string, map<string, TH2D* > > map_overlay2folder2hist;
+  map<string, map<string, TGraph2D* > > map_overlay2folder2graph;
+  map<string, map<string, TH2D* > > map_overlay2folder2interpolatedhist;
+
+  for (auto it_overlay : map_overlay2folder2poi2nll) {
+    int i_overlay = &it_overlay - &map_overlay2folder2poi2nll[0];
+    string thisOverlay = it_overlay.first;
+    map<string, map< vector<double>, double > > map_folder2poi2nll = it_overlay.second;
+
+    map<string, TH2D* > map_folder2hist;
+    map<string, TGraph2D* > map_folder2graph;
+    map<string, TH2D* > map_folder2interpolatedhist;
+
+    double xlo =  numeric_limits<double>::infinity();
+    double xhi = -numeric_limits<double>::infinity();
+    double ylo =  numeric_limits<double>::infinity();
+    double yhi = -numeric_limits<double>::infinity();
+
+    double xlo_raw =  numeric_limits<double>::infinity();
+    double xhi_raw = -numeric_limits<double>::infinity();
+    double ylo_raw =  numeric_limits<double>::infinity();
+    double yhi_raw = -numeric_limits<double>::infinity();
+
+    // Order coordinates for every folder and make histogram
+    for (map<string, map< vector<double>, double > >::iterator it_folder = map_folder2poi2nll.begin(); it_folder != map_folder2poi2nll.end(); ++it_folder) {
+      string thisFolder = it_folder->first;
+      map< vector<double>, double > map_poi2nll = it_folder->second;
+
+      set<double> sx, sy;
+      vector<double> x, y;
+
+      for(map< vector<double>, double>::iterator it_poi = map_poi2nll.begin(); it_poi != map_poi2nll.end(); ++it_poi) {
+        sx.insert(it_poi->first[0]);
+        sy.insert(it_poi->first[1]);
+      }
+
+      x.assign(sx.begin(), sx.end());
+      y.assign(sy.begin(), sy.end());
+
+      if (x[0] < xlo_raw) xlo_raw = x[0];
+      if (x[x.size()-1] > xhi_raw) xhi_raw = x[x.size()-1];
+
+      if (y[0] < ylo_raw) ylo_raw = y[0];
+      if (y[y.size()-1] > yhi_raw) yhi_raw = y[y.size()-1];
+
+      int nrPoints_in_x = x.size();
+      int nrPoints_in_y = y.size();
+
+      deque<double> x_bin_boundaries, y_bin_boundaries;
+
+      for (int i_point = 0; i_point < nrPoints_in_x - 1; i_point++) {
+        double point_lo = x[i_point];
+        double point_hi = x[i_point+1];
+        double edge = point_lo + fabs(point_hi - point_lo) / 2.0;
+        x_bin_boundaries.push_back(edge);
+      }
+
+      x_bin_boundaries.push_front(x_bin_boundaries[0] - fabs(x_bin_boundaries[1] - x_bin_boundaries[0]) / 1.0);
+      x_bin_boundaries.push_front(x_bin_boundaries[0] - fabs(x_bin_boundaries[1] - x_bin_boundaries[0]) / 1.0);
+      x_bin_boundaries.push_back(x_bin_boundaries[x_bin_boundaries.size()-1] + fabs(x_bin_boundaries[x_bin_boundaries.size()-1] - x_bin_boundaries[x_bin_boundaries.size()-2]) / 1.0);
+      x_bin_boundaries.push_back(x_bin_boundaries[x_bin_boundaries.size()-1] + fabs(x_bin_boundaries[x_bin_boundaries.size()-1] - x_bin_boundaries[x_bin_boundaries.size()-2]) / 1.0);
+
+      for (int i_point = 0; i_point < nrPoints_in_y - 1; i_point++) {
+        double point_lo = y[i_point];
+        double point_hi = y[i_point+1];
+        double edge = point_lo + (point_hi - point_lo) / 2.0;
+        y_bin_boundaries.push_back(edge);
+      }
+
+      y_bin_boundaries.push_front(y_bin_boundaries[0] - fabs(y_bin_boundaries[1] - y_bin_boundaries[0]) / 1.0);
+      y_bin_boundaries.push_front(y_bin_boundaries[0] - fabs(y_bin_boundaries[1] - y_bin_boundaries[0]) / 1.0);
+      y_bin_boundaries.push_back(y_bin_boundaries[y_bin_boundaries.size()-1] + fabs(y_bin_boundaries[y_bin_boundaries.size()-1] - y_bin_boundaries[y_bin_boundaries.size()-2]) / 1.0);
+      y_bin_boundaries.push_back(y_bin_boundaries[y_bin_boundaries.size()-1] + fabs(y_bin_boundaries[y_bin_boundaries.size()-1] - y_bin_boundaries[y_bin_boundaries.size()-2]) / 1.0);
+
+      if (x_bin_boundaries[0] < xlo) xlo = x_bin_boundaries[0];
+      if (x_bin_boundaries[x_bin_boundaries.size()-1] > xhi) xhi = x_bin_boundaries[x_bin_boundaries.size()-1];
+
+      if (y_bin_boundaries[0] < ylo) ylo = y_bin_boundaries[0];
+      if (y_bin_boundaries[y_bin_boundaries.size()-1] > yhi) yhi = y_bin_boundaries[y_bin_boundaries.size()-1];
+
+      TString histName = "hist_" + thisOverlay + "_" + thisFolder;
+      TH2D *h = new TH2D(histName.Data(), histName.Data(), x_bin_boundaries.size()-1, getAry(x_bin_boundaries), y_bin_boundaries.size()-1, getAry(y_bin_boundaries));
+
+      std::vector<double> x_graph, y_graph, z_graph;
+
+      for(map< vector<double>, double>::iterator it_poi = map_poi2nll.begin(); it_poi != map_poi2nll.end(); ++it_poi) {
+        double x_val = it_poi->first[0];
+        double y_val = it_poi->first[1];
+        double nll_val = it_poi->second;
+        int bin = h->FindBin(x_val, y_val);
+
+        h->SetBinContent(bin, nll_val);
+        x_graph.push_back(x_val);
+        y_graph.push_back(y_val);
+        z_graph.push_back(nll_val);
+      }
+
+      for (int i = 1 ; i < h->GetNbinsX()+1; i++) {
+        double x = h->GetXaxis()->GetBinCenter(i);
+        double y_lo = h->GetYaxis()->GetBinCenter(1);
+        double y_hi = h->GetYaxis()->GetBinCenter(h->GetNbinsY());
+        int bin_lo = h->FindBin(x, y_lo);
+        int bin_hi = h->FindBin(x, y_hi);
+        double z = h->GetMaximum();
+        h->SetBinContent(bin_lo, z);
+        h->SetBinContent(bin_hi, z);
+      }
+
+      for (int i = 1 ; i < h->GetNbinsY()+1; i++) {
+        double y = h->GetYaxis()->GetBinCenter(i);
+        double x_lo = h->GetXaxis()->GetBinCenter(1);
+        double x_hi = h->GetXaxis()->GetBinCenter(h->GetNbinsX());
+        int bin_lo = h->FindBin(x_lo, y);
+        int bin_hi = h->FindBin(x_hi, y);
+        double z = h->GetMaximum();
+        h->SetBinContent(bin_lo, z);
+        h->SetBinContent(bin_hi, z);
+      }
+
+      int n_graph = x_graph.size();
+      TGraph2D *g = new TGraph2D(n_graph, getAry(x_graph), getAry(y_graph), getAry(z_graph));
+
+      map_folder2hist[thisFolder] = h;
+      map_folder2graph[thisFolder] = g;
+    }
+
+    // Fill empty bins by 2D linear interpolation of closest filled bins
+    for (map<string, map< vector<double>, double > >::iterator it_folder = map_folder2poi2nll.begin(); it_folder != map_folder2poi2nll.end(); ++it_folder) {
+      string thisFolder = it_folder->first;
+      TH2D* h = map_folder2hist[thisFolder];
+      TGraph2D* g = map_folder2graph[thisFolder];
+
+      // find empty bins
+      for (int i = 1 ; i < h->GetNbinsX()+1; i++) {
+        for (int j = 1; j < h->GetNbinsY()+1; j++) {
+          double x = h->GetXaxis()->GetBinCenter(i);
+          double y = h->GetYaxis()->GetBinCenter(j);
+          int bin = h->FindBin(x, y);
+          double z = h->GetBinContent(bin);
+
+          if (z == 0) {
+            bool interpolated = false;
+
+            z = g->Interpolate(x, y);
+
+            if (AlmostEqualUlpsAndAbs(z, 0.0, 0.0001, 4)) z = h->GetMaximum();
+            if (fabs(z) < 100.0) z = h->GetMaximum();
+
+            h->SetBinContent(bin, z);
+          }
+        }
+      }
+    }
+
+    // Make smooth interpolated graph for every folder in poi range, find minimum nll
+    double minNll = TMath::Infinity();
+
+    for (map<string, map< vector<double>, double > >::iterator it_folder = map_folder2poi2nll.begin(); it_folder != map_folder2poi2nll.end(); ++it_folder) {
+      string thisFolder = it_folder->first;
+      TH2D* h = map_folder2hist[thisFolder];
+      TGraph2D* g = map_folder2graph[thisFolder];
+
+      int n_interp_bins = 50;
+
+      deque<double> x_bin_boundaries, y_bin_boundaries;
+      double xspacing = fabs(xhi - xlo) / n_interp_bins;
+      double yspacing = fabs(yhi - ylo) / n_interp_bins;
+
+      for (int i_point = 0; i_point < n_interp_bins + 1; i_point++) {
+        double edge = xlo + i_point * xspacing;
+        x_bin_boundaries.push_back(edge);
+      }
+
+      for (int i_point = 0; i_point < n_interp_bins + 1; i_point++) {
+        double edge = ylo + i_point * yspacing;
+        y_bin_boundaries.push_back(edge);
+      }
+
+      TH2D *h_interpolated = new TH2D(h->GetName(), "", x_bin_boundaries.size()-1, getAry(x_bin_boundaries), y_bin_boundaries.size()-1, getAry(y_bin_boundaries));
+
+      for (int i = 1 ; i < h_interpolated->GetNbinsX()+1; i++) {
+        for (int j = 1; j < h_interpolated->GetNbinsY()+1; j++) {
+          double x = h_interpolated->GetXaxis()->GetBinCenter(i);
+          double y = h_interpolated->GetYaxis()->GetBinCenter(j);
+
+          double z = g->Interpolate(x, y);
+
+          if (AlmostEqualUlpsAndAbs(z, 0.0, 0.0001, 4)) z = h->GetMaximum();
+          if (fabs(z) < 100.0) z = h->GetMaximum();
+
+          int bin = h_interpolated->FindBin(x, y);
+          h_interpolated->SetBinContent(bin, z);
+        }
+      }
+
+      // h_interpolated = IncreaseResolutionAndSmooth(h, 300, xlo, xhi, 300, ylo, yhi);
+      h_interpolated = h;
+
+      for (int i = 1 ; i < h_interpolated->GetNbinsX()+1; i++) {
+        for (int j = 1; j < h_interpolated->GetNbinsY()+1; j++) {
+          double x = h_interpolated->GetXaxis()->GetBinCenter(i);
+          double y = h_interpolated->GetYaxis()->GetBinCenter(j);
+          int bin = h_interpolated->FindBin(x, y);
+          double z = h_interpolated->GetBinContent(bin);
+
+          if (z < minNll) {
+            minNll = z;
+          }
+        }
+      }
+
+      map_folder2interpolatedhist[thisFolder] = h_interpolated;
+    }
+
+    // Subtract minimum nll in every point of coarse and smooth graph
+    for (map<string, map< vector<double>, double > >::iterator it_folder = map_folder2poi2nll.begin(); it_folder != map_folder2poi2nll.end(); ++it_folder) {
+      string thisFolder = it_folder->first;
+      TH2D* h_interpolated = map_folder2interpolatedhist[thisFolder];
+
+      for (int i = 1 ; i < h_interpolated->GetNbinsX()+1; i++) {
+        for (int j = 1; j < h_interpolated->GetNbinsY()+1; j++) {
+          double x = h_interpolated->GetXaxis()->GetBinCenter(i);
+          double y = h_interpolated->GetYaxis()->GetBinCenter(j);
+          int bin = h_interpolated->FindBin(x, y);
+          double z = h_interpolated->GetBinContent(bin);
+          z -= minNll;
+
+          h_interpolated->SetBinContent(bin, z);
+        }
+      }
+
+      // h_interpolated = IncreaseResolutionAndSmooth(h_interpolated, 50, xlo, xhi, 50, ylo, yhi);
+      map_folder2interpolatedhist[thisFolder] = h_interpolated;
+    }
+
+    map_overlay2folder2interpolatedhist[thisOverlay] = map_folder2interpolatedhist;
+  }
+
+  map<string, TH2D* > map_overlay2bestinterpolatedhist;
+
+  for(map<string, map<string, TH2D* > >::iterator it_overlay = map_overlay2folder2interpolatedhist.begin(); it_overlay != map_overlay2folder2interpolatedhist.end(); ++it_overlay) {
+    string thisOverlay = it_overlay->first;
+    map<string, TH2D* > map_folder2interpolatedhist = it_overlay->second;
+
+    bool isFirst = true;
+    TH2D* h_min;
+
+    for (map<string, TH2D* >::iterator it_folder = map_folder2interpolatedhist.begin(); it_folder != map_folder2interpolatedhist.end(); ++it_folder) {
+      TH2D* h_interpolated = it_folder->second;
+      if (isFirst) {
+        h_min = (TH2D*)h_interpolated->Clone();
+      } else {
+        for (int i = 1 ; i < h_min->GetNbinsX()+1; i++) {
+          for (int j = 1; j < h_min->GetNbinsY()+1; j++) {
+            double x = h_min->GetXaxis()->GetBinCenter(i);
+            double y = h_min->GetYaxis()->GetBinCenter(j);
+            int bin = h_min->FindBin(x, y);
+            double z_min = h_min->GetBinContent(bin);
+            double z = h_interpolated->GetBinContent(bin);
+
+            if (z < z_min) {
+              z_min = z;
+            }
+
+            h_min->SetBinContent(bin, z_min);
+          }
+        }
+      }
+    }
+
+    map_overlay2bestinterpolatedhist[thisOverlay] = h_min;
+  }
+
+  // Find all contours
+  map<string, map<int, deque<TGraph*> > > map_overlay2CL2bestgraph;
+  map<string, TGraph* > map_overlay2bestfit;
+  map<string, map<string, map<int, deque<TGraph*> > > > map_overlay2folder2CL2graph;
+
+  for(map<string, map<string, TH2D* > >::iterator it_overlay = map_overlay2folder2interpolatedhist.begin(); it_overlay != map_overlay2folder2interpolatedhist.end(); ++it_overlay) {
+    string thisOverlay = it_overlay->first;
+    map<string, TH2D* > map_folder2interpolatedhist = it_overlay->second;
+
+    TH2D* h_min = map_overlay2bestinterpolatedhist[thisOverlay];
+    map<int, deque<TGraph*> > map_CL2bestgraph = GetContours(h_min);
+    map_overlay2CL2bestgraph[thisOverlay] = map_CL2bestgraph;
+    TGraph* bestfitPoint = GetBestFit(h_min);
+    map_overlay2bestfit[thisOverlay] = bestfitPoint;
+
+    for (map<string, TH2D* >::iterator it_folder = map_folder2interpolatedhist.begin(); it_folder != map_folder2interpolatedhist.end(); ++it_folder) {
+      string thisFolder = it_folder->first;
+      TH2D* h_interpolated = it_folder->second;
+      map<int, deque<TGraph*> > map_CL2graph = GetContours(h_interpolated);
+      map_overlay2folder2CL2graph[thisOverlay][thisFolder] = map_CL2graph;
+    }
+  }
+
+  // Final 2D plotting
+  TCanvas* c1 = new TCanvas("c1", "c1", 1024, 768);
+  TPad *pad1 = new TPad("pad1", "pad1", 0.0 , 0.0 , 1.0 , 1.0 , 0);
+  pad1->Draw();
+  pad1->cd();
+
+  TMultiGraph* g_all = new TMultiGraph();
+  TMultiGraph* g_global = new TMultiGraph();
+  TLegend* leg = new TLegend(0.0, 0.0, 0.0, 0.0, "", "NDC");
+
+  // Prepare boundary histogram
+  TH2D* hist_boundaries = new TH2D("hist_boundaries", "hist_boundaries", 2, x_lo, x_hi, 2, y_lo, y_hi);
+  hist_boundaries->SetTitle((";" + axis_label[0] + ";" + axis_label[1]).c_str());
+  hist_boundaries->Draw();
+  gPad->Modified();
+
+  // Draw all graphs
+  for (map<string, map<string, map<int, deque<TGraph*> > > >::iterator it_overlay = map_overlay2folder2CL2graph.begin(); it_overlay != map_overlay2folder2CL2graph.end(); ++it_overlay) {
+    TString thisOverlay = it_overlay->first;
+    int i_overlay = std::distance(map_overlay2folder2CL2graph.begin(), it_overlay);
+
+    string legendText = legend[i_overlay];
+    Color_t mycolor = TColor::GetColor(color[i_overlay].c_str());
+
+    map<int, deque<TGraph*> > map_CL2bestgraph = map_overlay2CL2bestgraph[thisOverlay.Data()];
+
+    for(map<int, deque<TGraph*> >::iterator it_cl = map_CL2bestgraph.begin(); it_cl != map_CL2bestgraph.end(); ++it_cl) {
+      int thisCL = it_cl->first;
+      deque<TGraph*> bestgraph = it_cl->second;
+      TGraph* bestfitPoint = map_overlay2bestfit[thisOverlay.Data()];
+      bestfitPoint->SetMarkerStyle(34);
+      bestfitPoint->SetMarkerSize(2.0);
+      bestfitPoint->SetMarkerColor(mycolor);
+
+      g_all->Add(bestfitPoint, "P");
+      g_global->Add(bestfitPoint, "P");
+
+      for (int i_graph = 0; i_graph < bestgraph.size(); i_graph++) {
+        TGraph* g = bestgraph[i_graph];
+
+        g->SetLineWidth(3);
+        g->SetLineColor(mycolor);
+        g->SetLineStyle(style[i_overlay]);
+
+        if (thisCL == 1) {
+          g->SetLineStyle(kSolid);
+          g_all->Add(g, "l");
+          leg->AddEntry(g, legendText.c_str(), "L");
+        }
+
+        if (thisCL == 2) {
+          g->SetLineStyle(kDashed);
+          g_all->Add(g, "l");
+        }
+      }
+    }
+  }
+
+  g_all->Draw("L");
+
+  TList* g_global_list = g_global->GetListOfGraphs();
+  int nrGraphs = g_global_list->GetEntries();
+
+  for (int itrChan = 0; itrChan < nrGraphs; ++itrChan) {
+    TGraph* thisGraph = (TGraph*)g_global_list->At(itrChan);
+    Option_t* thisOptions = g_global->GetGraphDrawOption(thisGraph);
+    TString thisOptionsPlusSame = thisOptions;
+    thisOptionsPlusSame.ReplaceAll("A", "");
+    thisOptionsPlusSame += " SAME";
+    thisGraph->DrawClone(thisOptionsPlusSame.Data());
+  }
+
+  // Cover top part of canvas for printing labels, etc.
+  std::vector<double> whiteX;
+  std::vector<double> whiteY;
+
+  whiteX.push_back(x_lo); whiteY.push_back(0.725 * y_hi);
+  whiteX.push_back(x_hi); whiteY.push_back(0.725 * y_hi);
+  whiteX.push_back(x_hi); whiteY.push_back(y_hi);
+  whiteX.push_back(x_lo); whiteY.push_back(y_hi);
+  whiteX.push_back(x_lo); whiteY.push_back(0.725 * y_hi);
+  TGraph* gwhite = new TGraph(5, getAry(whiteX), getAry(whiteY));
+  gwhite->SetFillColor(kWhite);
+  gwhite->SetLineColor(kWhite);
+  gwhite->SetLineWidth(0);
+  gwhite->DrawClone("F SAME");
+
+  // Redraw axes
+  TGaxis *axis1 = new TGaxis(x_lo, y_lo, x_lo, y_hi, y_lo, y_hi, 0, "-");
+  axis1->SetNdivisions(hist_boundaries->GetYaxis()->GetNdivisions());
+  axis1->ImportAxisAttributes(hist_boundaries->GetYaxis());
+  axis1->SetTitle(hist_boundaries->GetYaxis()->GetTitle());
+  axis1->SetLabelFont(42);
+  axis1->SetTitleFont(42);
+  axis1->SetNoExponent(kTRUE);
+  axis1->SetMoreLogLabels();
+  axis1->SetLineColor(kBlack);
+  hist_boundaries->GetYaxis()->SetLabelSize(0);
+  hist_boundaries->GetYaxis()->SetTitleSize(0);
+  axis1->Draw();
+
+  TGaxis *axis2 = new TGaxis(x_hi, y_lo, x_hi, y_hi, y_lo, y_hi, 0, "+");
+  axis2->SetNdivisions(hist_boundaries->GetYaxis()->GetNdivisions());
+  axis2->ImportAxisAttributes(hist_boundaries->GetYaxis());
+  axis2->SetTitle("");
+  axis2->SetLabelFont(42);
+  axis2->SetTitleFont(42);
+  axis2->SetNoExponent(kTRUE);
+  axis2->SetMoreLogLabels();
+  axis2->SetLineColor(kBlack);
+  hist_boundaries->GetYaxis()->SetLabelSize(0);
+  axis2->Draw();
+
+  TGaxis *axis0 = new TGaxis(x_lo, y_lo, x_hi, y_lo, x_lo, x_hi, hist_boundaries->GetXaxis()->GetNdivisions(), "+");
+  axis0->ImportAxisAttributes(hist_boundaries->GetXaxis());
+  axis0->SetTextFont(42);
+  axis0->SetLabelFont(42);
+  axis0->SetTitleFont(42);
+  axis0->SetLabelSize(1.0*hist_boundaries->GetXaxis()->GetLabelSize());
+  axis0->SetLineColor(kBlack);
+  axis0->SetTitleOffset(1.0);
+  axis0->SetTitle(hist_boundaries->GetXaxis()->GetTitle());
+  // axis0->SetTitle("");
+  hist_boundaries->GetXaxis()->SetLabelSize(0);
+  // axis0->SetNdivisions(505);
+  axis0->Draw();
+
+  TGaxis *axis10 = new TGaxis(x_lo, y_hi, x_hi, y_hi, x_lo, x_hi, hist_boundaries->GetXaxis()->GetNdivisions(), "-");
+  axis10->ImportAxisAttributes(hist_boundaries->GetXaxis());
+  axis10->SetTextFont(42);
+  axis10->SetLabelFont(42);
+  axis10->SetTitleFont(42);
+  axis10->SetLabelSize(1.0*hist_boundaries->GetXaxis()->GetLabelSize());
+  axis10->SetTitle("");
+  axis10->SetLineColor(kBlack);
+  hist_boundaries->GetXaxis()->SetLabelSize(0);
+  axis10->Draw();
+
+  c1->Update();
+
+  // ATLAS label
+  double position_label_x = 0.2;
+  double position_label_y = 0.885;
+
+  TLatex tex;
+  tex.SetNDC();
+  tex.SetTextFont(72);
+  tex.SetTextColor(kBlack);
+  tex.DrawLatex(position_label_x, position_label_y, "ATLAS");
+
+  // Internal, Preliminary, etc.
+  TLatex tex_label;
+  tex_label.SetNDC();
+  tex_label.SetTextFont(42);
+  tex_label.SetTextColor(1);
+  tex_label.DrawLatex(position_label_x + 0.1275, position_label_y, label.c_str());
+
+  // Luminosity
+  TLatex tex_luminosity;
+  tex_luminosity.SetNDC();
+  tex_luminosity.SetTextFont(42);
+  tex_luminosity.SetTextColor(1);
+  tex_luminosity.DrawLatex(position_label_x, position_label_y - 1 * 0.055, luminosity.c_str());
+
+  // Legend
+  double position_legend_x = position_label_x + 0.4;
+  double position_legend_y = position_label_y + 0.035 - 0.043 * leg->GetListOfPrimitives()->GetSize();
+
+  leg->SetTextFont(42);
+  leg->SetFillColor(kWhite);
+  leg->SetX1(position_legend_x + 0.0);
+  leg->SetY2(position_legend_y + 0.043 * leg->GetListOfPrimitives()->GetSize());
+  leg->SetX2(position_legend_x + 0.25);
+  leg->SetY1(position_legend_y - 0.0);
+  leg->SetTextSize(0.034);
+  leg->SetFillStyle(0);
+  leg->SetBorderSize(0);
+  leg->Draw("F");
+
+  // General legend
+
+  TLegend* leg_general = new TLegend(0.0, 0.0, 0.0, 0.0, "", "NDC");
+  leg_general->SetNColumns(2);
+  leg_general->SetTextFont(42);
+  leg_general->SetFillColor(kWhite);
+  leg_general->SetX1(0.195);
+  leg_general->SetY2(0.275);
+  leg_general->SetX2(0.5);
+  leg_general->SetY1(0.175);
+  leg_general->SetTextSize(0.034);
+  leg_general->SetFillStyle(0);
+  leg_general->SetBorderSize(0);
+
+  const Int_t n_leg = 1;
+  Double_t x0_leg[n_leg], y0_leg[n_leg];
+  Double_t x1_leg[n_leg], y1_leg[n_leg];
+
+  x0_leg[0] = 1;
+  y0_leg[0] = 1;
+  x1_leg[0] = 1;
+  y1_leg[0] = 1;
+
+  TGraph* g0_leg = new TGraph(n_leg, x0_leg, y0_leg);
+  TGraph* g1_leg = new TGraph(n_leg, x1_leg, y1_leg);
+
+  g0_leg->SetMarkerStyle(29);
+  g0_leg->SetMarkerSize(3);
+  g0_leg->SetLineStyle(kSolid);
+  g0_leg->SetLineWidth(3);
+  g0_leg->SetMarkerSize(2.5);
+
+  g1_leg->SetMarkerStyle(34);
+  g1_leg->SetMarkerSize(3);
+  g1_leg->SetLineStyle(kDashed);
+  g1_leg->SetLineWidth(3);
+  g1_leg->SetMarkerSize(2.0);
+
+  leg_general->AddEntry(g0_leg, "SM", "P");
+  leg_general->AddEntry(g0_leg, "68% CL", "L");
+  leg_general->AddEntry(g1_leg, "Best fit", "P");
+  leg_general->AddEntry(g1_leg, "95% CL", "L");
+
+  g0_leg->Draw("PSAME");
+  leg_general->Draw("F");
+
+  // Save the canvas
+  c1->Update();
+  pad1->Update();
+
+  stringstream saveName;
+  saveName << "scan_" << poi[0] << "_" << poi[1];
+  save(saveName.str(), "eps", c1);
+  save(saveName.str(), "pdf", c1);
+  save(saveName.str(), "C", c1);
+}
+
+
+// _____________________________________________________________________________
+TH2D* IncreaseResolutionAndSmooth(TH2D* h, int xbins, double xlo, double xhi,
+                                  int ybins, double ylo, double yhi)
+{
+  deque<double> x_bin_boundaries, y_bin_boundaries;
+  double xspacing = fabs(xhi - xlo) / xbins;
+  double yspacing = fabs(yhi - ylo) / ybins;
+
+  for (int i_point = 0; i_point < xbins + 1; i_point++) {
+    double edge = xlo + i_point * xspacing;
+    x_bin_boundaries.push_back(edge);
+  }
+
+  for (int i_point = 0; i_point < ybins + 1; i_point++) {
+    double edge = ylo + i_point * yspacing;
+    y_bin_boundaries.push_back(edge);
+  }
+
+  RooWorkspace* ws = new RooWorkspace();
+
+  stringstream lookup, rawx, rawy;
+  lookup << "{lookup_x[" << xlo << "," << xhi << "],lookup_y[" << ylo << "," << yhi << "]}";
+  rawx << "expr::func_x('@0',x[" << xlo << "," << xhi << "])";
+  rawx << "expr::func_y('@0',y[" << ylo << "," << yhi << "])";
+
+  ws->factory(lookup.str().c_str()) ;
+  RooRealVar* lookup_x = ws->var("lookup_x");
+  RooRealVar* lookup_y = ws->var("lookup_y");
+  RooDataHist dh("dh", "dh", RooArgList(*lookup_x, *lookup_y), h);
+  ws->factory(rawx.str().c_str());
+  ws->factory(rawy.str().c_str());
+  ws->import(dh);
+  ws->factory("HistFunc::z_lookup({x,y},{lookup_x,lookup_y},dh,2)");
+  RooHistFunc* hf = (RooHistFunc*)ws->obj("z_lookup");
+
+  TH2D *h_interpolated = new TH2D(h->GetName(), "", x_bin_boundaries.size()-1, getAry(x_bin_boundaries), y_bin_boundaries.size()-1, getAry(y_bin_boundaries));
+
+  for (int i = 1 ; i < h_interpolated->GetNbinsX()+1; i++) {
+    for (int j = 1; j < h_interpolated->GetNbinsY()+1; j++) {
+      double x = h_interpolated->GetXaxis()->GetBinCenter(i);
+      double y = h_interpolated->GetYaxis()->GetBinCenter(j);
+
+      ws->var("x")->setVal(x);
+      ws->var("y")->setVal(y);
+
+      double z = hf->getVal();
+
+      int bin = h_interpolated->FindBin(x, y);
+      h_interpolated->SetBinContent(bin, z);
+    }
+  }
+
+  return h_interpolated;
+}
+
+
+// _____________________________________________________________________________
+map<int, deque<TGraph*> > GetContours(TH2D* h)
+{
+  map<int, deque<TGraph*> > map_CL2graph;
+
+  double def1s = TMath::ChisquareQuantile( 0.68, 2 );
+  double def2s = TMath::ChisquareQuantile( 0.95, 2 );
+  double def3s = TMath::ChisquareQuantile( 0.997, 2 );
+
+  // find and draw n sigma contours on top
+  double contours[3];
+  contours[0] = def1s;
+  contours[1] = def2s;
+  contours[2] = def3s;
+
+  stringstream ss;
+  ss << "tmpc_" << h->GetName();
+
+  TCanvas* tmpc = new TCanvas(ss.str().c_str(), "Contour List", 0, 0, 600, 600);
+  TH2D *h3 = new TH2D(*static_cast<TH2D*>(h));
+
+  h3->SetContour(3, contours);
+
+  tmpc->cd();
+  h3->Draw("CONT LIST");
+  tmpc->Update();
+
+  // Get Contours
+  TObjArray *conts = (TObjArray*)gROOT->GetListOfSpecials()->FindObject("contours");
+  TList* contLevel = NULL;
+  TGraph* curv     = NULL;
+  TGraph* gc       = NULL;
+
+  Int_t nGraphs    = 0;
+  Int_t TotalConts = 0;
+
+  if (conts == NULL) {
+    cout << "WARNING::No Contours Were Extracted!" << endl;
+    TotalConts = 0;
+    return map_CL2graph;
+  } else {
+    TotalConts = conts->GetSize();
+  }
+
+  for(int i = 0; i < TotalConts; i++){
+    contLevel = (TList*)conts->At(i);
+    nGraphs += contLevel->GetSize();
+  }
+
+  nGraphs = 0;
+  double x0, y0, z0;
+
+  for(int i = 0; i < TotalConts; i++){
+    contLevel = (TList*)conts->At(i);
+    if (i == 0) z0 = contours[2];
+    if (i == 1) z0 = contours[1];
+    if (i == 2) z0 = contours[0];
+
+    // Get first graph from list on curves on this level
+    curv = (TGraph*)contLevel->First();
+    for(int icont = 0; icont < contLevel->GetSize(); icont++) {
+      curv->GetPoint(0, x0, y0);
+
+      gc = (TGraph*)curv->Clone();
+
+      if (z0 == def1s) {
+        map_CL2graph[3].push_back(gc);
+      } else if (z0 == def2s) {
+        map_CL2graph[2].push_back(gc);
+      } else if (z0 == def3s) {
+        map_CL2graph[1].push_back(gc);
+      }
+
+      nGraphs++;
+
+      curv = (TGraph*)contLevel->After(curv); // Get Next graph
+    }
+  }
+
+  return map_CL2graph;
+}
+
+
+// _____________________________________________________________________________
+TGraph* GetBestFit(TH2D* h)
+{
+  TGraph* bestfitPoint;
+
+  double minNll = TMath::Infinity();
+  const Int_t n = 1;
+  Double_t x0[n], y0[n];
+
+  for (int i = 1 ; i < h->GetNbinsX()+1; i++) {
+    for (int j = 1; j < h->GetNbinsY()+1; j++) {
+      double x = h->GetXaxis()->GetBinCenter(i);
+      double y = h->GetYaxis()->GetBinCenter(j);
+      int bin = h->FindBin(x, y);
+      double z = h->GetBinContent(bin);
+
+      h->SetBinContent(bin, z);
+
+      if (z < minNll) {
+        minNll = z;
+        x0[0] = x;
+        y0[0] = y;
+      }
+    }
+  }
+
+  bestfitPoint = new TGraph(n, x0, y0);
+
+  return bestfitPoint;
 }
