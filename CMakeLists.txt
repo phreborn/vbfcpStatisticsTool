@@ -64,7 +64,7 @@ include(cmake/Modules/YamlCpp.cmake)
 include(cmake/Modules/Eigen.cmake)
 
 # Includes
-set(PROJECT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+set(PROJECT_INCLUDE_DIRS include ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 
 if(NOT DEFINED ENV{AtlasProject}) # not defined when inside ATLAS environment
   include(${ROOT_USE_FILE})
@@ -74,15 +74,15 @@ include_directories(${PROJECT_INCLUDE_DIRS})
 
 # ATLAS style
 include_directories(${PROJECT_SOURCE_DIR}/atlasrootstyle/)
-set(sources atlasrootstyle/AtlasLabels.C atlasrootstyle/AtlasStyle.C atlasrootstyle/AtlasUtils.C)
-set(headers atlasrootstyle/AtlasLabels.h atlasrootstyle/AtlasStyle.h atlasrootstyle/AtlasUtils.h)
+set(atlasrootstyle_sources atlasrootstyle/AtlasLabels.C atlasrootstyle/AtlasStyle.C atlasrootstyle/AtlasUtils.C)
+set(atlasrootstyle_headers atlasrootstyle/AtlasLabels.h atlasrootstyle/AtlasStyle.h atlasrootstyle/AtlasUtils.h)
 
 # Generate dictionary
-ROOT_GENERATE_DICTIONARY(G__StatisticsTools MODULE utils.hxx RooMultiVarGaussianHighPrecision.h ExtendedModel.hxx ExtendedMinimizer.hxx ${headers} LINKDEF LinkDef.h)
+ROOT_GENERATE_DICTIONARY(G__StatisticsTools MODULE utils.hxx RooMultiVarGaussianHighPrecision.h ExtendedModel.hxx ExtendedMinimizer.hxx ${atlasrootstyle_headers} LINKDEF include/LinkDef.h)
 
 # Shared library with generated dictionary
 set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES})
-add_library(StatisticsTools SHARED utils.cxx RooMultiVarGaussianHighPrecision.cxx ExtendedModel.cxx ExtendedMinimizer.cxx G__StatisticsTools.cxx ${sources})
+add_library(StatisticsTools SHARED src/utils.cxx src/RooMultiVarGaussianHighPrecision.cxx src/ExtendedModel.cxx src/ExtendedMinimizer.cxx G__StatisticsTools.cxx ${atlasrootstyle_sources})
 target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
 add_dependencies(StatisticsTools YAML-CPP Eigen)
 
