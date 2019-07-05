@@ -46,6 +46,8 @@ def parse_args(argv):
     p.add_argument("--multifix", type=int, help="Fix MultiPdf level 2.")
     p.add_argument("--precision", type=float, help="Precision for scan.")
     p.add_argument("--eps", type=float, help="Convergence criterium.")
+    p.add_argument("--calls", type=str, default="-1", help="Maximum number of function calls.")
+    p.add_argument("--iters", type=str, default="-1", help="Maximum number of Minuit iterations.")
     p.add_argument("--offset", type=int, help="Offset likelihood.")
     p.add_argument("--optimize", type=int, help="Optimize constant terms.")
     p.add_argument("--loglevel", type=str, help="Control verbosity.")

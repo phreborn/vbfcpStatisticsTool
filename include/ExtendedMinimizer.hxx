@@ -74,7 +74,7 @@ public:
   pair<TGraph*, TGraph*> createProfile(RooRealVar* var, double lo, double hi, int nbins);
 
   // Steering
-  int minimize( const RooCmdArg& arg1 = RooCmdArg::none(), const RooCmdArg& arg2 = RooCmdArg::none(), const RooCmdArg& arg3 = RooCmdArg::none(), const RooCmdArg& arg4 = RooCmdArg::none(), const RooCmdArg& arg5 = RooCmdArg::none(), const RooCmdArg& arg6 = RooCmdArg::none(), const RooCmdArg& arg7 = RooCmdArg::none(), const RooCmdArg& arg8 = RooCmdArg::none(), const RooCmdArg& arg9 = RooCmdArg::none(), const RooCmdArg& arg10 = RooCmdArg::none(), const RooCmdArg& arg11 = RooCmdArg::none(), const RooCmdArg& arg12 = RooCmdArg::none() );
+  int minimize( const RooCmdArg& arg1 = RooCmdArg::none(), const RooCmdArg& arg2 = RooCmdArg::none(), const RooCmdArg& arg3 = RooCmdArg::none(), const RooCmdArg& arg4 = RooCmdArg::none(), const RooCmdArg& arg5 = RooCmdArg::none(), const RooCmdArg& arg6 = RooCmdArg::none(), const RooCmdArg& arg7 = RooCmdArg::none(), const RooCmdArg& arg8 = RooCmdArg::none(), const RooCmdArg& arg9 = RooCmdArg::none(), const RooCmdArg& arg10 = RooCmdArg::none(), const RooCmdArg& arg11 = RooCmdArg::none(), const RooCmdArg& arg12 = RooCmdArg::none(), const RooCmdArg& arg13 = RooCmdArg::none(), const RooCmdArg& arg14 = RooCmdArg::none(), const RooCmdArg& arg15 = RooCmdArg::none(), const RooCmdArg& arg16 = RooCmdArg::none() );
   int minimize( const RooLinkedList& cmdList );
 
 // _____________________________________________________________________________
@@ -88,6 +88,8 @@ public:
   static RooCmdArg Cond(const RooArgSet& condArgs) { return RooCmdArg("Cond",kTRUE,0,0,0,0,0,&condArgs,0); }
   static RooCmdArg ReuseMinimizer(Bool_t flag = kFALSE) { return RooCmdArg("ReuseMinimizer",flag,0,0,0,0,0,0,0); }
   static RooCmdArg ReuseNLL(Bool_t flag = kTRUE) { return RooCmdArg("ReuseNLL",flag,0,0,0,0,0,0,0); }
+  static RooCmdArg MaxFunctionCalls(Int_t calls) { return RooCmdArg("MaxFunctionCalls",calls,0,0,0,0,0,0,0); }
+  static RooCmdArg MaxIterations(Int_t iters) { return RooCmdArg("MaxIterations",iters,0,0,0,0,0,0,0); }
 
 // _____________________________________________________________________________
 protected:
@@ -131,6 +133,8 @@ private:
   Int_t fEigen;
   Int_t fReuseMinimizer;
   Int_t fReuseNLL;
+  Int_t fMaxCalls;
+  Int_t fMaxIters;
   Double_t fEps;
   Double_t fNsigma;
   Double_t fPrecision;

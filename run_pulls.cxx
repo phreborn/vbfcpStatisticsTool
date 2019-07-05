@@ -98,6 +98,8 @@ int main(int argc, char** argv)
   int numCPU             = 1;
   double precision       = 0.001;
   bool setInitialError   = false;
+  int calls              = -1;
+  int iters              = -1;
 
   // Misc settings
   int fixCache           = 1;
@@ -135,6 +137,8 @@ int main(int argc, char** argv)
     ( "optimize"      , po::value<int>( &constOpt )->default_value( constOpt )                     , "Optimize constant terms." )
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                  , "POIs to use." )
     ( "parameter"     , po::value<string>( &variable )->default_value( variable )                  , "Parameter to rank." )
+    ( "calls"         , po::value<int>( &calls )->default_value( calls )                           , "Maximum number of function calls." )
+    ( "iters"         , po::value<int>( &iters )->default_value( iters )                           , "Maximum number of Minuit iterations." )
     ;
 
   po::variables_map vm0;
@@ -448,6 +452,7 @@ int main(int argc, char** argv)
                                Constrain(*nuis), GlobalObservables(*globs),
                                NumCPU(numCPU, 3), Offset(offsetting), Optimize(constOpt),
                                Precision(precision), ExtendedMinimizer::Scan(RooArgSet(*nuip)),
+                               ExtendedMinimizer::MaxFunctionCalls(calls), ExtendedMinimizer::MaxIterations(iters),
                                PrintLevel(printLevel));
   LOG(logINFO) << "Fitting time: " << setprecision(9) << timer_unconditional.elapsed() << " seconds";
   PrintResourcesUsed(thistime);
@@ -581,7 +586,8 @@ int main(int argc, char** argv)
                                Strategy(defaultStrategy), ExtendedMinimizer::Eps(eps),
                                Constrain(*nuis), GlobalObservables(*globs),
                                NumCPU(numCPU, 3), Offset(offsetting), Optimize(constOpt),
-                               ExtendedMinimizer::ReuseNLL(1), Precision(precision));
+                               ExtendedMinimizer::ReuseNLL(1), Precision(precision),
+                               ExtendedMinimizer::MaxFunctionCalls(calls), ExtendedMinimizer::MaxIterations(iters));
 
   vector<double> pois_up;
   for (size_t i = 0; i < rank_poi_vector.size(); i++) {
@@ -601,7 +607,8 @@ int main(int argc, char** argv)
                                Strategy(defaultStrategy), ExtendedMinimizer::Eps(eps),
                                Constrain(*nuis), GlobalObservables(*globs),
                                NumCPU(numCPU, 3), Offset(offsetting), Optimize(constOpt),
-                               ExtendedMinimizer::ReuseNLL(1), Precision(precision));
+                               ExtendedMinimizer::ReuseNLL(1), Precision(precision),
+                               ExtendedMinimizer::MaxFunctionCalls(calls), ExtendedMinimizer::MaxIterations(iters));
 
   vector<double> pois_down;
   for (size_t i = 0; i < rank_poi_vector.size(); i++) {
@@ -627,7 +634,8 @@ int main(int argc, char** argv)
                                  Strategy(defaultStrategy), ExtendedMinimizer::Eps(eps),
                                  Constrain(*nuis), GlobalObservables(*globs),
                                  NumCPU(numCPU, 3), Offset(offsetting), Optimize(constOpt),
-                                 ExtendedMinimizer::ReuseNLL(1), Precision(precision));
+                                 ExtendedMinimizer::ReuseNLL(1), Precision(precision),
+                                 ExtendedMinimizer::MaxFunctionCalls(calls), ExtendedMinimizer::MaxIterations(iters));
 
     for (size_t i = 0; i < rank_poi_vector.size(); i++) {
       pois_nom_up.push_back(rank_poi_vector[i]->getVal());
@@ -647,7 +655,8 @@ int main(int argc, char** argv)
                                  Strategy(defaultStrategy), ExtendedMinimizer::Eps(eps),
                                  Constrain(*nuis), GlobalObservables(*globs),
                                  NumCPU(numCPU, 3), Offset(offsetting), Optimize(constOpt),
-                                 ExtendedMinimizer::ReuseNLL(1), Precision(precision));
+                                 ExtendedMinimizer::ReuseNLL(1), Precision(precision),
+                                 ExtendedMinimizer::MaxFunctionCalls(calls), ExtendedMinimizer::MaxIterations(iters));
 
     for (size_t i = 0; i < rank_poi_vector.size(); i++) {
       pois_nom_down.push_back(rank_poi_vector[i]->getVal());

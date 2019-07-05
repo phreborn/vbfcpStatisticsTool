@@ -49,6 +49,8 @@ def parse_args(argv):
     p.add_argument("--strategy", type=str, default="0", help="Defaul strategy.")
     p.add_argument("--precision", type=str, default="0.01", help="Precision of uncertainty evaluation.")
     p.add_argument("--eps", type=str, default="1.0", help="Eps.")
+    p.add_argument("--calls", type=str, default="-1", help="Maximum number of function calls.")
+    p.add_argument("--iters", type=str, default="-1", help="Maximum number of Minuit iterations.")
     p.add_argument("--loglevel", type=str, default="INFO", help="Control the printout.")
     p.add_argument("--queue", type=str, default="espresso", help="Queue to submit to.")
     p.add_argument("--parametersPerJob", type=str, default="1", help="Parameters to evaluate per job.")
@@ -242,6 +244,11 @@ def get_command(parameters, args):
             command += " --eps %s" % (args.eps)
         if (args.precision != ""):
             command += " --precision %s" % (args.precision)
+        if (args.calls != "-1"):
+            command += " --calls %s" % (args.calls)
+        if (args.iters != "-1"):
+            command += " --iters %s" % (args.iters)
+
         command += ";\n    "
         command = command.replace("--poi ',", "--poi '")
 
