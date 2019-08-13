@@ -1,6 +1,6 @@
 [submodule "atlasrootstyle"]
 	path = atlasrootstyle
-	url = https://gitlab.cern.ch/atlas-publications-committee/atlasrootstyle.git
+	url = ../../../../atlas-publications-committee/atlasrootstyle.git
 	branch = master
 [submodule "include/cpp-text-table"]
 	path = include/cpp-text-table
