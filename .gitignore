@@ -1,3 +1,7 @@
+build/*
+.emacs/*
+.vim/*
+.vscode/*
 *.so
 .*.un~
 *~
@@ -8,5 +12,5 @@ build/
 lib/
 pdf-files/
 root-files/
+sub_scripts/
 workspace
-

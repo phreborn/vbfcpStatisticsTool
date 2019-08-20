@@ -1,0 +1,6 @@
+#BSUB -J scan_{POI}_{POIVAL}
+#BSUB -o lsf/{FOLDER}/stdout_{POI}_{POIVAL}.out
+#BSUB -q {QUEUE}
+#BSUB -u {MAIL}
+#BSUB -R "select[pool>{POOL} && mem>{MEM} && swap>{SWAP}]"
+#BSUB -R "rusage[mem={MEM}]"

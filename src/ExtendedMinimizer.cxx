@@ -32,8 +32,8 @@ ExtendedMinimizer::ExtendedMinimizer( std::string MinimizerName, RooAbsPdf* pdf,
   fTimer( 1 ),
   fPrintLevel( 1 ),
   fDefaultStrategy( 0 ),
-  fHesse( 0 ),
-  fMinos( 0 ),
+  fHesse( 1 ),
+  fMinos( 1 ),
   fScan( 0 ),
   fNumee( 5 ),
   fDoEEWall( 1 ),
@@ -42,6 +42,8 @@ ExtendedMinimizer::ExtendedMinimizer( std::string MinimizerName, RooAbsPdf* pdf,
   fReuseMinimizer( 0 ),
   fReuseNLL( 0 ),
   fEps( 1.0 ),
+  fMaxCalls( -1 ),
+  fMaxIters( -1 ),
   // fNsigma( 1.959591794 ), // 1dof 95%
   // fNsigma( 2.44744765 ), // 2dof 95%
   fNsigma( 1 ), // 1sigma 1dof
@@ -74,7 +76,8 @@ ExtendedMinimizer::~ExtendedMinimizer()
 // extended from RooAbsPdf::fitTo()
 int ExtendedMinimizer::minimize( const RooCmdArg& arg1, const RooCmdArg& arg2, const RooCmdArg& arg3, const RooCmdArg& arg4,
                                  const RooCmdArg& arg5, const RooCmdArg& arg6, const RooCmdArg& arg7, const RooCmdArg& arg8,
-                                 const RooCmdArg& arg9, const RooCmdArg& arg10, const RooCmdArg& arg11, const RooCmdArg& arg12 )
+                                 const RooCmdArg& arg9, const RooCmdArg& arg10, const RooCmdArg& arg11, const RooCmdArg& arg12,
+                                 const RooCmdArg& arg13, const RooCmdArg& arg14, const RooCmdArg& arg15, const RooCmdArg& arg16 )
 {
   RooLinkedList l;
   l.Add((TObject*)&arg1);   l.Add((TObject*)&arg2);
@@ -83,6 +86,8 @@ int ExtendedMinimizer::minimize( const RooCmdArg& arg1, const RooCmdArg& arg2, c
   l.Add((TObject*)&arg7);   l.Add((TObject*)&arg8);
   l.Add((TObject*)&arg9);   l.Add((TObject*)&arg10);
   l.Add((TObject*)&arg11);  l.Add((TObject*)&arg12);
+  l.Add((TObject*)&arg13);  l.Add((TObject*)&arg14);
+  l.Add((TObject*)&arg15);  l.Add((TObject*)&arg16);
   return minimize(l);
 }
 
@@ -112,6 +117,14 @@ void ExtendedMinimizer::createMinimizer()
     fMinimizer->setProfile(fTimer);
     fMinimizer->setStrategy(fDefaultStrategy);
     fMinimizer->setEps(fEps);
+
+    if (fMaxCalls != -1) {
+      fMinimizer->setMaxFunctionCalls(fMaxCalls);
+    }
+
+    if (fMaxIters != -1) {
+      fMinimizer->setMaxIterations(fMaxIters);
+    }
   }
 }
 
@@ -141,6 +154,8 @@ int ExtendedMinimizer::parseConfig( const RooLinkedList& cmdList )
   pc.defineInt("reminim",      "ReuseMinimizer",   0, fReuseMinimizer);
   pc.defineInt("renll",        "ReuseNLL",         0, fReuseNLL);
   pc.defineDouble("eps",       "Eps",              0, fEps);
+  pc.defineInt("maxCalls",     "MaxFunctionCalls", 0, fMaxCalls);
+  pc.defineInt("maxIters",     "MaxIterations",    0, fMaxIters);
   pc.defineDouble("nsigma",    "NSigma",           0, fNsigma);
   pc.defineDouble("precision", "Precision",        0, fPrecision);
   pc.defineString("mintype",   "Minimizer",        0, fMinimizerType.c_str());
@@ -172,6 +187,8 @@ int ExtendedMinimizer::parseConfig( const RooLinkedList& cmdList )
   fReuseMinimizer  = pc.getInt("reminim");
   fReuseNLL        = pc.getInt("renll");
   fEps             = pc.getDouble("eps");
+  fMaxCalls        = pc.getInt("maxCalls");
+  fMaxIters        = pc.getInt("maxIters");
   fNsigma          = pc.getDouble("nsigma");
   fPrecision       = pc.getDouble("precision");
   fMinosSet        = static_cast<RooArgSet*>(pc.getObject("minosSet"));

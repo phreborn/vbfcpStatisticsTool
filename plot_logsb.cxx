@@ -51,13 +51,13 @@
 #include "ExtendedModel.hxx"
 #include "RooMultiVarGaussianHighPrecision.h"
 
-#include "TextTable.hxx"
+#include "cpp-text-table/TextTable.h"
 #include "log.hxx"
 #include "utils.hxx"
 
-#include "atlasstyle-00-03-05/AtlasLabels.h"
-#include "atlasstyle-00-03-05/AtlasStyle.h"
-#include "atlasstyle-00-03-05/AtlasUtils.h"
+#include "atlasrootstyle/AtlasLabels.h"
+#include "atlasrootstyle/AtlasStyle.h"
+#include "atlasrootstyle/AtlasUtils.h"
 
 #include <chrono>
 #include <iomanip>
@@ -1290,11 +1290,9 @@ int main(int argc, char **argv) {
   }
 
   // save plot
-  c->SaveAs("log_sb.pdf");
-  c->SaveAs("log_sb.C");
-  c->SaveAs("log_sb.root");
-  c->SaveAs("log_sb.eps");
-  c->SaveAs("log_sb.png");
+  stringstream saveName;
+  saveName << "log_sb";
+  save(saveName.str(), {"eps", "pdf", "png", "C"}, c);
 
   PrintResourcesUsed(thistime);
 }

@@ -46,6 +46,8 @@ def parse_args(argv):
     p.add_argument("--multifix", type=int, help="Fix MultiPdf level 2.")
     p.add_argument("--precision", type=float, help="Precision for scan.")
     p.add_argument("--eps", type=float, help="Convergence criterium.")
+    p.add_argument("--calls", type=str, default="-1", help="Maximum number of function calls.")
+    p.add_argument("--iters", type=str, default="-1", help="Maximum number of Minuit iterations.")
     p.add_argument("--offset", type=int, help="Offset likelihood.")
     p.add_argument("--optimize", type=int, help="Optimize constant terms.")
     p.add_argument("--loglevel", type=str, help="Control verbosity.")
@@ -155,7 +157,7 @@ def main(argv):
     if not os.path.exists(submission_path):
         os.makedirs(submission_path)
 
-    cmd = buildCommand("./bin/breakdown.exe", args)
+    cmd = buildCommand("./bin/run_breakdown.exe", args)
 
     replacedir = dict()
     replacedir['folder'] = args.folder
@@ -179,4 +181,4 @@ def main(argv):
 if __name__ == "__main__":
     exit(main(sys.argv[1:]))
 
-    cmd = "./bin/breakdown.exe --input ../Workspaces_couplings/v4/combination/WS-Comb-mu.root --workspace combWS --data combData --poi 'mu' --eps 0.1 --loglevel DEBUG --strategy 0 --classification ../config/classification_couplings.yaml --subtractFromTotal > breakdown_couplings_fine_180609.txt"
+    cmd = "./bin/run_breakdown.exe --input ../Workspaces_couplings/v4/combination/WS-Comb-mu.root --workspace combWS --data combData --poi 'mu' --eps 0.1 --loglevel DEBUG --strategy 0 --classification ../config/classification_couplings.yaml --subtractFromTotal > breakdown_couplings_fine_180609.txt"

@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# INFO: variables surrounded with single curly brackets are to be changed in the condor_submit.py script
-
-echo "Running in: $PWD  @ $HOSTNAME"
-echo "Time : " $(date -u)
+{DIRECTIVES}
 
 HOMEDIR={HOME_FOLDER}
 OUTDIR=$HOMEDIR
@@ -11,6 +8,9 @@ FOLDER={FOLDER}
 
 stagein()
 {{
+    echo "Running in: $PWD  @ $HOSTNAME"
+    echo "Time : " $(date -u)
+
     uname -a
     ulimit -S -s 20000
     ulimit -Sc 0
@@ -40,7 +40,7 @@ stagein()
 
 runcode()
 {{
-  {COMMAND}
+    {COMMAND}
 }}
 
 stageout()

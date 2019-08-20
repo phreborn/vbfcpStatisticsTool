@@ -40,11 +40,11 @@
 
 #include "log.hxx"
 #include "utils.hxx"
-#include "TextTable.hxx"
+#include "cpp-text-table/TextTable.h"
 
-#include "atlasstyle-00-03-05/AtlasUtils.h"
-#include "atlasstyle-00-03-05/AtlasLabels.h"
-#include "atlasstyle-00-03-05/AtlasStyle.h"
+#include "atlasrootstyle/AtlasUtils.h"
+#include "atlasrootstyle/AtlasLabels.h"
+#include "atlasrootstyle/AtlasStyle.h"
 
 #include <iomanip>
 #include <stdlib.h>
@@ -107,6 +107,8 @@ int main(int argc, char** argv)
   int numCPU             = 1;
   double precision       = 0.001;
   bool setInitialError   = false;
+  int calls              = -1;
+  int iters              = -1;
 
   // Misc settings
   int fixCache           = 1;
@@ -146,9 +148,11 @@ int main(int argc, char** argv)
     ( "optimize"      , po::value<int>( &constOpt )->default_value( constOpt )                     , "Optimize constant terms." )
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                  , "Control verbosity." )
     ( "classification", po::value<string>( &classification )->default_value( classification )      , "Definition of uncertainty categories." )
-    ( "category"      , po::value<string>( &category )->default_value( category )                        , "Specific category which should be submitted" )
+    ( "category"      , po::value<string>( &category )->default_value( category )                  , "Specific category which should be submitted" )
     ( "subtractFromTotal", po::bool_switch( &subtractFromTotal )                                   , "Subtract uncertainties from total." )
     ( "doIndividual"  , po::bool_switch( &doIndividual )                                           , "Compute uncertainty for individual sources." )
+    ( "calls"         , po::value<int>( &calls )->default_value( calls )                           , "Maximum number of function calls." )
+    ( "iters"         , po::value<int>( &iters )->default_value( iters )                           , "Maximum number of Minuit iterations." )
     ;
 
   po::variables_map vm0;
@@ -392,6 +396,8 @@ int main(int argc, char** argv)
   opt.push_back(Offset(offsetting));
   opt.push_back(Optimize(constOpt));
   opt.push_back(Precision(precision));
+  opt.push_back(ExtendedMinimizer::MaxFunctionCalls(calls));
+  opt.push_back(ExtendedMinimizer::MaxIterations(iters));
 
   RooLinkedList* cmdList_init = new RooLinkedList();
   for (auto &o : opt) {

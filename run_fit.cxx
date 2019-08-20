@@ -41,9 +41,9 @@
 #include "log.hxx"
 #include "utils.hxx"
 
-#include "atlasstyle-00-03-05/AtlasUtils.h"
-#include "atlasstyle-00-03-05/AtlasLabels.h"
-#include "atlasstyle-00-03-05/AtlasStyle.h"
+#include "atlasrootstyle/AtlasUtils.h"
+#include "atlasrootstyle/AtlasLabels.h"
+#include "atlasrootstyle/AtlasStyle.h"
 
 #include <iomanip>
 #include <stdlib.h>
@@ -109,6 +109,8 @@ int main(int argc, char** argv)
   bool minosScan         = false;
   bool computeZ          = false;
   double altPOI          = 0.0;
+  int calls              = -1;
+  int iters              = -1;
 
   // Misc settings
   int fixCache           = 1;
@@ -151,6 +153,8 @@ int main(int argc, char** argv)
     ( "makeSnapshots" , po::bool_switch( &makeParameterSnapshots )                                 , "Make nominal paramter snapshots." )
     ( "significance"  , po::bool_switch( &computeZ )                                               , "Compute significance wrt alternative hypothesis." )
     ( "alternative"   , po::value<double>( &altPOI )->default_value( altPOI )                      , "POI values for alternative hypothesis." )
+    ( "calls"         , po::value<int>( &calls )->default_value( calls )                           , "Maximum number of function calls." )
+    ( "iters"         , po::value<int>( &iters )->default_value( iters )                           , "Maximum number of Minuit iterations." )
     ;
 
   po::variables_map vm0;
@@ -360,6 +364,8 @@ int main(int argc, char** argv)
   opt.push_back(Precision(precision));
   opt.push_back(Hesse());
   opt.push_back(Save());
+  opt.push_back(ExtendedMinimizer::MaxFunctionCalls(calls));
+  opt.push_back(ExtendedMinimizer::MaxIterations(iters));
   if (minosScan) opt.push_back(ExtendedMinimizer::Scan(scan_poi_set));
 
   RooLinkedList* cmdList = new RooLinkedList();
