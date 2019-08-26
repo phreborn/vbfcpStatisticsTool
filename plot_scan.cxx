@@ -97,14 +97,14 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis = vector<s
             vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > map_overlay2folder2poi2nuis = vector<pair<string, map<string, map< vector<double>, map<string, double> > > > >(),
             double x_lo = -3.0, double x_hi = 3.0, double y_lo = 0.0, double y_hi = 10.0,
             vector<string> color = vector<string>(), vector<int> style = vector<int>(), vector<string> legend = vector<string>(), vector<string> axis_label = vector<string>(),
-            string label = "", string luminosity = "", bool twoStepInterpolation=false);
+            string label = "", string luminosity = "", bool twoStepInterpolation=false, string tag = "output");
 void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis = vector<string>(),
             vector<pair<string, map<string, map< vector<double>, double > > > > map_overlay2folder2poi2nll = vector<pair<string, map<string, map< vector<double>, double > > > >(),
             vector<pair<string, map<string, map< vector<double>, int > > > > map_overlay2folder2poi2status = vector<pair<string, map<string, map< vector<double>, int > > > >(),
             vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > map_overlay2folder2poi2nuis = vector<pair<string, map<string, map< vector<double>, map<string, double> > > > >(),
             double x_lo = -3.0, double x_hi = 3.0, double y_lo = -3.0, double y_hi = 3.0,
             vector<string> color = vector<string>(), vector<int> style = vector<int>(), vector<string> legend = vector<string>(), vector<string> axis_label = vector<string>(),
-            string label = "", string luminosity = "", vector<double> reference = vector<double>(), string reference_label = "");
+            string label = "", string luminosity = "", vector<double> reference = vector<double>(), string reference_label = "", string tag = "output");
 TH2D* IncreaseResolutionAndSmooth(TH2D* h, int xbins, double xlo, double xhi, int ybins, double ylo, double yhi);
 map<int, deque<TGraph*> > GetContours(TH2D* h);
 TGraph* GetBestFit(TH2D* h);
@@ -125,10 +125,11 @@ int main(int argc, char **argv) {
   vector<double> x_range    = {};
   vector<double> y_range    = {};
   string label              = "Internal";
-  string luminosity         = "#sqrt{s} = 13 TeV, 36.1 fb^{-1}";
+  string luminosity         = "#sqrt{s} = 13 TeV, 80.5 fb^{-1}";
   vector<double> reference  = {1, 1};
   string reference_label    = "";
   string loglevel           = "INFO";
+  string tag                = "output";
 
   using namespace boost;
   namespace po = boost::program_options;
@@ -149,6 +150,7 @@ int main(int argc, char **argv) {
     ( "reference"       , po::value<vector<double>> ( &reference )->multitoken()                  , "Nominal." )
     ( "reference_label" , po::value<string>( &reference_label )->default_value( reference_label ) , "Nominal label." )
     ( "loglevel"        , po::value<string>( &loglevel )->default_value( loglevel )               , "Loglevel." )
+    ( "tag"             , po::value<string>( &tag )->default_value( tag )                         , "Output tag." )
     ;
 
   po::variables_map vm0;
@@ -193,9 +195,9 @@ int main(int argc, char **argv) {
 
   // Plotting
   if (poi.size() == 1) {
-    plot1D(input, poi[0], nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity);
+    plot1D(input, poi[0], nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity, false, tag);
   } else if (poi.size() == 2) {
-    plot2D(input, poi, nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity, reference, reference_label);
+    plot2D(input, poi, nuis, map_overlay2folder2poi2nll, map_overlay2folder2poi2status, map_overlay2folder2poi2nuis, x_range[0], x_range[1], y_range[0], y_range[1], color, style, legend, axis_label, label, luminosity, reference, reference_label, tag);
   } else {
     LOG(logERROR) << "Plotting for multiple pois not yet implemented.";
   }
@@ -329,7 +331,7 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis,
             vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > map_overlay2folder2poi2nuis,
             double x_lo, double x_hi, double y_lo, double y_hi,
             vector<string> color, vector<int> style, vector<string> legend, vector<string> axis_label,
-            string label, string luminosity, bool twoStepInterpolation)
+            string label, string luminosity, bool twoStepInterpolation, string tag)
 {
   LOG(logINFO) << "Plotting 1D likelihood scan.";
 
@@ -1026,7 +1028,7 @@ void plot1D(vector<string> filenames, string poi, vector<string> nuis,
   pad1->Update();
 
   stringstream saveName;
-  saveName << "scan_" << poi;
+  saveName << tag << "_scan_" << poi;
   save(saveName.str(), {"eps", "pdf", "png", "C"}, c1);
 }
 
@@ -1038,7 +1040,7 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
             vector<pair<string, map<string, map< vector<double>, map<string, double> > > > > map_overlay2folder2poi2nuis,
             double x_lo, double x_hi, double y_lo, double y_hi,
             vector<string> color, vector<int> style, vector<string> legend, vector<string> axis_label,
-            string label, string luminosity, vector<double> reference, string reference_label)
+            string label, string luminosity, vector<double> reference, string reference_label, string tag)
 {
   LOG(logINFO) << "Plotting 2D likelihood scan.";
 
@@ -1571,7 +1573,7 @@ void plot2D(vector<string> filenames, vector<string> poi, vector<string> nuis,
   pad1->Update();
 
   stringstream saveName;
-  saveName << "scan_" << poi[0] << "_" << poi[1];
+  saveName << tag << "_scan_" << poi[0] << "_" << poi[1];
   save(saveName.str(), {"eps", "pdf", "png", "C"}, c1);
 }
 
@@ -1742,6 +1744,10 @@ TGraph* GetBestFit(TH2D* h)
   }
 
   bestfitPoint = new TGraph(n, x0, y0);
+
+  cout << "\n*****************************\n";
+  cout << "Best fit at:\t[" << x0[0] << ";\t" << y0[0] << "]\n";
+  cout << "*****************************\n\n";
 
   return bestfitPoint;
 }
