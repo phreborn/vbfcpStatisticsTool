@@ -1,0 +1,6 @@
+#SBATCH --job-name=scan_{POI}_{POIVAL}
+#SBATCH --output=slurm/{FOLDER}/stdout_{POI}_{POIVAL}.out
+#SBATCH --partition={QUEUE}
+#SBATCH --mail-user={MAIL}
+#SBATCH --mem={MEM}
+

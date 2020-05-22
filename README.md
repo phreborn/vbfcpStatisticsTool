@@ -6,27 +6,32 @@ Setup the ATLAS environment:
 setupATLAS;
 ~~~~
 
+Get packages:
+
+~~~~
+lsetup git
+git clone https://:@gitlab.cern.ch:8443/mstankai/StatisticsTools.git
+cd StatisticsTools
+git clone https://:@gitlab.cern.ch:8443/atlas-publications-committee/atlasrootstyle.git
+git clone https://github.com/haarcuba/cpp-text-table.git
+~~~~
+
 Setup `ROOT` via an `LCG` release:
 
 ~~~~
-lsetup "lcgenv -p LCG_93 x86_64-centos7-gcc62-opt ROOT";
-export CC=/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/bin/gcc;
-export CXX=/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/bin/g++;
+lsetup "views LCG_97_ATLAS_1 x86_64-centos7-gcc8-opt"
+export CC=/cvmfs/sft.cern.ch/lcg/releases/gcc/8.3.0/x86_64-centos7/bin/gcc
+export CXX=/cvmfs/sft.cern.ch/lcg/releases/gcc/8.3.0/x86_64-centos7/bin/g++
 ~~~~
 
-Setup a recent `cmake` version:
-
-~~~~
-lsetup cmake;
-~~~~
 
 # Compiling tools
 
 ~~~~
-cd StatisticsTools;
 mkdir build;
 cd build;
-cmake .. -DBOOST_ROOT=/cvmfs/sft.cern.ch/lcg/releases/LCG_93/Boost/1.66.0/x86_64-centos7-gcc62-opt -DBOOST_INCLUDEDIR=/cvmfs/sft.cern.ch/lcg/releases/LCG_93/Boost/1.66.0/x86_64-centos7-gcc62-opt/include/boost -DBoost_LIBRARY_DIRS=/cvmfs/sft.cern.ch/lcg/releases/LCG_93/Boost/1.66.0/x86_64-centos7-gcc62-opt/lib;
+cmake .. -DBOOST_ROOT=/cvmfs/sft.cern.ch/lcg/releases/LCG_97_ATLAS_1/Boost/1.72.0/x86_64-centos7-gcc8-op-DBOOST_INCLUDEDIR=/cvmfs/sft.cern.ch/lcg/releases/LCG_97_ATLAS_1/Boost/1.72.0/x86_64-centos7-gcc8-opt/include/boost -DBOOST_INCLUDEDIR=/cvmfs/sft.cern.ch/lcg/releases/LCG_97_ATLAS_1/Boost/1.72.0/x86_64-centos7-gcc8-opt/include/boost -DBoost_LIBRARY_DIRS=/cvmfs/sft.cern.ch/lcg/releases/LCG_97_ATLAS_1/Boost/1.72.0/x86_64-centos7-gcc8-opt/lib
+
 make VERBOSE=1;
 ~~~~
 

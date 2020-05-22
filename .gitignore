@@ -14,3 +14,5 @@ pdf-files/
 root-files/
 sub_scripts/
 workspace
+include/yaml-cpp
+cpp-text-table/

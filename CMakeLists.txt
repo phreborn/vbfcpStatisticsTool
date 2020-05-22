@@ -35,14 +35,14 @@ set(EXECUTABLE_PLOT_SCAN plot_scan.exe)
 set(SOURCE_FILES_LIMIT compute_limit_from_scan.cxx)
 set(EXECUTABLE_LIMIT compute_limit_from_scan.exe)
 
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG(-std=c++14 COMPILER_SUPPORTS_CXX14)
-if(COMPILER_SUPPORTS_CXX14)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-  add_definitions(-std=c++14)
-else()
-  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler.")
-endif()
+#include(CheckCXXCompilerFlag)
+#CHECK_CXX_COMPILER_FLAG(-std=c++14 COMPILER_SUPPORTS_CXX14)
+#if(COMPILER_SUPPORTS_CXX14)
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+#  add_definitions(-std=c++14)
+#else()
+#  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler.")
+#endif()
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
@@ -64,7 +64,7 @@ include(cmake/Modules/YamlCpp.cmake)
 include(cmake/Modules/Eigen.cmake)
 
 # Includes
-set(PROJECT_INCLUDE_DIRS include ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+set(PROJECT_INCLUDE_DIRS include ${CMAKE_CURRENT_SOURCE_DIR} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${YAML_INCLUDE_DIR})
 
 if(NOT DEFINED ENV{AtlasProject}) # not defined when inside ATLAS environment
   include(${ROOT_USE_FILE})
