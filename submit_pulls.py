@@ -66,6 +66,7 @@ def parse_args(argv):
     batchsystem = p.add_mutually_exclusive_group()
     batchsystem.add_argument('--condor', help='CERN condor', action='store_true')
     batchsystem.add_argument('--lsf', help='CERN LSF', action='store_true')
+    batchsystem.add_argument('--slurm', help='SLURM', action='store_true')
 
     args = p.parse_args()
 
@@ -85,6 +86,8 @@ def main(argv):
         args.cluster = "lsf"
         print("CERN lsf is not active anymore, consider using condor")
         sys.exit(-1)
+    elif args.slurm:
+        args.cluster = "slurm"
     else:
         print("Must specify cluster type: condor or lsf")
         sys.exit(-1)
@@ -108,6 +111,8 @@ def main(argv):
         submit_lsf(args, jobs)
     elif args.cluster == "condor":
         submit_condor(args, jobs)
+    elif args.cluster == "slurm":
+        submit_slurm(args, jobs)
 
 
 def get_nuisances(args):
@@ -187,6 +192,19 @@ def write_job(parameters_in_array, args):
         directives = directives.format(**replacedict)
     elif args.cluster == "condor":
         directives = ""
+    elif  args.cluster == "slurm":
+        with open("share/slurm_submit.sub") as f:
+            directives = f.read()
+
+        replacedict = dict()
+        replacedict["POI"] = args.poi
+        replacedict["POIVAL"] = parameter
+        replacedict["FOLDER"] = args.folder
+        replacedict["QUEUE"] = args.queue
+        replacedict["MAIL"] = args.mail
+        replacedict["MEM"] = args.mem
+
+        directives = directives.format(**replacedict)
 
     with open("share/batchjob.sh") as f:
         batchjob = f.read()
@@ -205,7 +223,7 @@ def write_job(parameters_in_array, args):
     with open(batchjob_file, "w") as f:
         f.write(batchjob)
 
-    if args.cluster == "lsf":
+    if args.cluster in ["lsf", "slurm"]:
         return batchjob_file
     elif args.cluster == "condor":
         return job_name
@@ -287,6 +305,14 @@ def submit_condor(args, jobs):
     print(command)
 
     os.system(command)
+
+
+def submit_slurm(args, jobs):
+    for submission_script in jobs.split("\n"):
+        if not submission_script: continue
+        command = "sbatch " + submission_script
+        print(command)
+        os.system(command)
 
 
 if __name__ == '__main__':

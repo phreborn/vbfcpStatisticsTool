@@ -93,6 +93,7 @@ int main(int argc, char **argv) {
   string poiname = "mu";
   string names = "";
   string label_on_plot = "LHC Run 1";
+  string tag = "output";
 
   int firstParameter = 1;
   int showTopParameters = -1;
@@ -144,6 +145,7 @@ int main(int argc, char **argv) {
     ( "loglevel"      , po::value<string>( &loglevel )->default_value( loglevel )                         , "POIs to use." )
     ( "map"           , po::value<string>( &names )->default_value( names )                  , "Path to nice parameter names." )
     ( "label"         , po::value<string>( &label_on_plot )->default_value( label_on_plot )               , "Label on plot" )
+    ( "tag"           , po::value<string>( &tag )->default_value( tag )                      , "Output tag" )
     ;
 
   po::variables_map vm0;
@@ -1419,7 +1421,7 @@ int main(int argc, char **argv) {
   double labelSize = 1. / nrNuis;
   if (showTopParameters != -1)
     labelSize = 1.0 / showTopParameters;
-  h->SetLabelSize(labelSize > 0.02 ? 0.02 : labelSize, "Y");
+  h->SetLabelSize(labelSize > 0.03 ? 0.03 : labelSize, "Y");
   // h->GetYaxis()->SetLabelSize(0.035);
   h->GetXaxis()->SetLabelColor(kWhite);
   h->GetXaxis()->SetAxisColor(kWhite);
@@ -1587,7 +1589,7 @@ int main(int argc, char **argv) {
   // Save the plot
   stringstream saveName;
   // saveName << cardName << "_" << poiname << "_rank_" << setfill('0') << setw(4) << firstParameter + 1 << "_to_" << setfill('0') << setw(4) << firstParameter + showTopParameters;
-  saveName << "ranking_" << poiname << "_rank_" << setfill('0') << setw(4) << firstParameter + 1 << "_to_" << setfill('0') << setw(4) << firstParameter + showTopParameters;
+  saveName << tag <<"_ranking_" << poiname << "_rank_" << setfill('0') << setw(4) << firstParameter + 1 << "_to_" << setfill('0') << setw(4) << firstParameter + showTopParameters;
   save(saveName.str(), {"eps", "pdf", "png", "C"}, c1);
 
   // Finish plotting
