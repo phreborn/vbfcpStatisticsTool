@@ -25,6 +25,7 @@
 #include "Math/MinimizerOptions.h"
 
 #include "RooAbsPdf.h"
+#include "RooTwoSidedCBShape.h"
 #include "RooAbsData.h"
 #include "RooArgSet.h"
 #include "RooWorkspace.h"

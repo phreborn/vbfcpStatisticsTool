@@ -17,6 +17,9 @@ set(EXECUTABLE_BREAKDOWN run_breakdown.exe)
 set(SOURCE_FILES_FIT run_fit.cxx)
 set(EXECUTABLE_FIT run_fit.exe)
 
+set(SOURCE_FILES_READ readWS.cxx)
+set(EXECUTABLE_READ readWS.exe)
+
 set(SOURCE_FILES_PULLS run_pulls.cxx)
 set(EXECUTABLE_PULLS run_pulls.exe)
 
@@ -78,17 +81,20 @@ set(atlasrootstyle_sources atlasrootstyle/AtlasLabels.C atlasrootstyle/AtlasStyl
 set(atlasrootstyle_headers atlasrootstyle/AtlasLabels.h atlasrootstyle/AtlasStyle.h atlasrootstyle/AtlasUtils.h)
 
 # Generate dictionary
-ROOT_GENERATE_DICTIONARY(G__StatisticsTools MODULE utils.hxx RooMultiVarGaussianHighPrecision.h ExtendedModel.hxx ExtendedMinimizer.hxx ${atlasrootstyle_headers} LINKDEF include/LinkDef.h)
+ROOT_GENERATE_DICTIONARY(G__StatisticsTools MODULE utils.hxx RooMultiVarGaussianHighPrecision.h RooTwoSidedCBShape.h ExtendedModel.hxx ExtendedMinimizer.hxx ${atlasrootstyle_headers} LINKDEF include/LinkDef.h)
 
 # Shared library with generated dictionary
 set(PROJECT_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} ${YAMLCPP_LIBRARIES})
-add_library(StatisticsTools SHARED src/utils.cxx src/RooMultiVarGaussianHighPrecision.cxx src/ExtendedModel.cxx src/ExtendedMinimizer.cxx G__StatisticsTools.cxx ${atlasrootstyle_sources})
+add_library(StatisticsTools SHARED src/utils.cxx src/RooMultiVarGaussianHighPrecision.cxx src/RooTwoSidedCBShape.cxx src/ExtendedModel.cxx src/ExtendedMinimizer.cxx G__StatisticsTools.cxx ${atlasrootstyle_sources})
 target_link_libraries(StatisticsTools ${PROJECT_LIBRARIES})
 add_dependencies(StatisticsTools YAML-CPP Eigen)
 
 # Create a main program using the library
 add_executable(${EXECUTABLE_FIT} ${SOURCE_FILES_FIT})
 target_link_libraries(${EXECUTABLE_FIT} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_READ} ${SOURCE_FILES_READ})
+target_link_libraries(${EXECUTABLE_READ} StatisticsTools ${PROJECT_LIBRARIES})
 
 add_executable(${EXECUTABLE_PULLS} ${SOURCE_FILES_PULLS})
 target_link_libraries(${EXECUTABLE_PULLS} StatisticsTools ${PROJECT_LIBRARIES})

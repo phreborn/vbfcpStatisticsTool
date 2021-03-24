@@ -35,6 +35,7 @@
 #include "RooArgList.h"
 #include "RooMsgService.h"
 #include "RooMinimizer.h"
+#include "RooTwoSidedCBShape.h"
 #include "RooFitResult.h"
 
 #include "RooStats/ModelConfig.h"
