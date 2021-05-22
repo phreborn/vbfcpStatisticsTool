@@ -1,4 +1,4 @@
-tag=ggF
+tag=
 
 allJobs=jobsSub.sh
 > ${allJobs}
@@ -11,6 +11,8 @@ for cat in ${cats[*]};do
   sysList[${#sysList[@]}]=ATLAS_Hgg_BIAS_OO_${cat}
 done
 
+for sys in ${sysList[@]};do echo ${sys};done
+
 sequence=($(seq 1 10 ${#sysList[@]}))
 
 intvl=9
@@ -19,7 +21,7 @@ for init in ${sequence[@]};do
   fin=$((${init} + ${intvl}))
   jobName=Collect_${init}_${fin}; echo ${jobName}
   #if [ ! -d csv/${jobName} ];then mkdir -p csv/${jobName};fi
-  if [ ! -d submit_${jobName} ]; then mkdir submit_${jobName}; fi
+  if [ ! -d hep_sub_${jobName} ]; then mkdir hep_sub_${jobName}; fi
   executable=exe_${jobName}.sh
   > ${executable}
 
@@ -38,7 +40,7 @@ for init in ${sequence[@]};do
 
   chmod +x exe_${jobName}.sh
 
-  echo "hep_sub exe_${jobName}.sh -g atlas -os CentOS7 -wt mid -mem 2048 -o submit_${jobName}/log-0.out -e submit_${jobName}/log-0.err" >> ${allJobs}
+  echo "hep_sub exe_${jobName}.sh -g atlas -os CentOS7 -wt mid -mem 2048 -o hep_sub_${jobName}/log-0.out -e hep_sub_${jobName}/log-0.err" >> ${allJobs}
 
-  if [ "$(ls submit_${jobName}/)" != "" ];then rm submit_${jobName}/*;fi
+  if [ "$(ls hep_sub_${jobName}/)" != "" ];then rm hep_sub_${jobName}/*;fi
 done
