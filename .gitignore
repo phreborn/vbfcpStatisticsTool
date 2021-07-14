@@ -1,3 +1,6 @@
+*png
+hep_sub_Collect_*
+exe_Collect_*sh
 build/*
 .emacs/*
 .vim/*
