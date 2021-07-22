@@ -59,9 +59,11 @@ int main(int argc, char** argv)
   char *dScan = argv[3];
 
   char *pngName = Form("asimovFit/asimovFit_%s_%s.png", dScan, cat);
+  TString tspngName = TString(pngName);
 
   //cat = "OO_TT_b1";
   cat = Form("OO_%s", cat);
+  TString tscat = TString(cat);
 
   TCanvas *c = new TCanvas("c", "canvas", 800, 800);
 
@@ -82,10 +84,14 @@ int main(int argc, char** argv)
   RooRealVar *mu = w->var("mu");
   RooRealVar *mu_vbf_sm = w->var("mu_VBF_SM");
   RooRealVar *mu_vbf_rw = w->var("mu_VBF_RW");
+  RooRealVar *mu_ggF_sm = w->var("mu_ggH_SM");
+  RooRealVar *mu_ggF = w->var("mu_ggH");
 
   mu->setVal(1.);
   mu_vbf_sm->setVal(1.);
   mu_vbf_rw->setVal(0.);
+  mu_ggF_sm->setVal(1.);
+  mu_ggF->setVal(0.);
 
 
   RooAbsData *ds_asi = w->data("asimovData_SB_SM");
@@ -121,7 +127,7 @@ int main(int argc, char** argv)
   //myy->setRange("SB1", 105000, 120000);
   //myy->setRange("SB2", 130000, 160000);
   //double count_data = m_data->sumEntries("channellist==channellist::OO_TT_b1"); cout<<"yield of Asimov data:"<<count_data<<endl;
-  double count_data = m_data->sumEntries(Form("channellist==channellist::%s", cat)); cout<<"yield of Asimov data:"<<count_data<<endl;
+  double count_data = m_data->sumEntries(Form("channellist==channellist::%s", tscat.Data())); cout<<"yield of sideband data:"<<count_data<<endl;
   //pdf->plotOn(myyfr);
   //pdf->plotOn(myyfr, Normalization(count_data, RooAbsReal::NumEvent), ProjectionRange("SB1,SB2"));
   //pdf->plotOn(myyfr, ProjectionRange("SB1,SB2"));
@@ -129,5 +135,6 @@ int main(int argc, char** argv)
 
   myyfr->Draw();
 
-  c->SaveAs(pngName);
+  c->SaveAs(tspngName);
+  c->SaveAs(tspngName.ReplaceAll("png", "pdf"));
 }
