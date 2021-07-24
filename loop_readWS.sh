@@ -9,7 +9,7 @@ echo $ds
 for d in m00;do
   for cat in TT TL LT LL;do
     for bin in b1 b2 b3 b4 b5 b6;do
-      bin/readWS.exe ../xmlAnaWSBuilder/run/${wsDir}/vbf_cp_${d}/vbf_cp_${d}.root ${cat}_${bin} ${d} 
+      bin/readWS_fit.exe ../xmlAnaWSBuilder/run/${wsDir}/vbf_cp_${d}/vbf_cp_${d}.root ${cat}_${bin} ${d} 
     done
   done
 done

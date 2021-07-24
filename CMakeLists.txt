@@ -20,6 +20,9 @@ set(EXECUTABLE_FIT run_fit.exe)
 set(SOURCE_FILES_READ readWS.cxx)
 set(EXECUTABLE_READ readWS.exe)
 
+set(SOURCE_FILES_READFIT readWS_fit.cxx)
+set(EXECUTABLE_READFIT readWS_fit.exe)
+
 set(SOURCE_FILES_PULLS run_pulls.cxx)
 set(EXECUTABLE_PULLS run_pulls.exe)
 
@@ -95,6 +98,9 @@ target_link_libraries(${EXECUTABLE_FIT} StatisticsTools ${PROJECT_LIBRARIES})
 
 add_executable(${EXECUTABLE_READ} ${SOURCE_FILES_READ})
 target_link_libraries(${EXECUTABLE_READ} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_READFIT} ${SOURCE_FILES_READFIT})
+target_link_libraries(${EXECUTABLE_READFIT} StatisticsTools ${PROJECT_LIBRARIES})
 
 add_executable(${EXECUTABLE_PULLS} ${SOURCE_FILES_PULLS})
 target_link_libraries(${EXECUTABLE_PULLS} StatisticsTools ${PROJECT_LIBRARIES})
