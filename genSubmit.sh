@@ -35,6 +35,7 @@ for init in ${sequence[@]};do
   echo "export CXX=/cvmfs/sft.cern.ch/lcg/releases/gcc/8.3.0/x86_64-centos7/bin/g++" >> exe_${jobName}.sh
   for num in `seq ${init} 1 ${fin}`;do
   echo "" >> exe_${jobName}.sh
+    #echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WSAllCats_SMEFT/vbf_cp_m0d00/vbf_cp_m0d00.root --workspace combWS --data asimovData_SB_SM --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_ggH[1],mu_ggH_SM[0] --parameter ${sysList[${num}]}" >> exe_${jobName}.sh
     echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WSAllCats/vbf_cp_m00/vbf_cp_m00.root --workspace combWS --data asimovData_SB_SM --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_ggH[1],mu_ggH_SM[0] --parameter ${sysList[${num}]}" >> exe_${jobName}.sh
   done
 

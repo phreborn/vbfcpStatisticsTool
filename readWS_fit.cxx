@@ -107,6 +107,8 @@ int main(int argc, char** argv)
   pdf->fitTo(*dataAsi);
 
   RooPlot *myyfr = myy->frame();
+  myyfr->GetXaxis()->SetTitle("m_{#gamma#gamma} [MeV]");
+  myyfr->SetTitle("Asimov fit in "+tscat);
   dataAsi->plotOn(myyfr, DataError(RooAbsData::Poisson));
   mu->setVal(0.);
   double nbkg_hat = w->var("nbkg_"+tscat)->getVal();

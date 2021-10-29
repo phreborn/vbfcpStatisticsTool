@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
   string overlayCard = "";
   string poiname = "mu";
   string names = "";
-  string label_on_plot = "LHC Run 1";
+  string label_on_plot = "LHC Run 2";
   string tag = "output";
 
   int firstParameter = 1;
@@ -1414,7 +1414,7 @@ int main(int argc, char **argv) {
       label = map_name[label];
     }
 
-    h->GetYaxis()->SetBinLabel(i + 1, drawParamNames ? label.c_str() : "");
+    h->GetYaxis()->SetBinLabel(i + 1, drawParamNames ? TString(label.c_str()).ReplaceAll("ATLAS_", "").Data() : "");
   }
   // for (int i = offset; i < nrNuis + offset; i++) h->GetYaxis()->SetBinLabel(i + 1, "");
   h->LabelsOption("h");
@@ -1439,7 +1439,8 @@ int main(int argc, char **argv) {
   axis_poi->ImportAxisAttributes(h->GetXaxis());
   axis_poi->SetName("axis_poi");
   stringstream ss_poi;
-  ss_poi << "#Delta#hat{" << poiname << "}";
+  //ss_poi << "#Delta#hat{" << poiname << "}";
+  ss_poi << "#Delta#hat{" << "#mu_{VBF}" << "}";
   if (useRelativeImpact)
     axis_poi->SetTitle("#Delta#hat{#mu}/#Delta#hat{#mu}_{tot}");
   // else axis_poi->SetTitle("#Delta#hat{m}_{H} [GeV]");
@@ -1449,7 +1450,7 @@ int main(int argc, char **argv) {
   axis_poi->SetLineColor(kBlack);
   axis_poi->SetLabelColor(kBlack);
   axis_poi->SetTitleColor(kBlack);
-  axis_poi->SetLabelSize(0.034);
+  axis_poi->SetLabelSize(0.024);
   axis_poi->SetTitleSize(0.034);
 
   // axis for the nuisance parameter pull
@@ -1537,14 +1538,16 @@ int main(int argc, char **argv) {
     leg->AddEntry(gr1s_ol, "Alt 1 standard deviation", "l");
   if (drawPrefitImpactBand) {
     stringstream ss_poi;
-    ss_poi << "Prefit Impact on #hat{" << poiname << "}";
+    //ss_poi << "Prefit Impact on #hat{" << poiname << "}";
+    ss_poi << "Prefit Impact on #hat{" << "#mu_{VBF}" << "}";
     leg->AddEntry(gr_poi_nom, ss_poi.str().c_str(), "f");
     if (nrNuis_ol > 0)
       leg->AddEntry(gr_poi_nom_ol, "Alt Prefit Impact on #hat{#mu}", "f");
   }
   if (drawPostfitImpactBand) {
     stringstream ss_poi;
-    ss_poi << "Postfit Impact on #hat{" << poiname << "}";
+    //ss_poi << "Postfit Impact on #hat{" << poiname << "}";
+    ss_poi << "Postfit Impact on #hat{" << "#mu_{VBF}" << "}";
     leg->AddEntry(gr_poi, ss_poi.str().c_str(), "f");
     if (nrNuis_ol > 0)
       leg->AddEntry(gr_poi_ol, "Alt Postfit Impact on #hat{#mu}", "f");
