@@ -65,7 +65,7 @@ int main(int argc, char** argv)
   cat = Form("OO_%s", cat);
   TString tscat = TString(cat);
 
-  TCanvas *c = new TCanvas("c", "canvas", 800, 800);
+  TCanvas *c = new TCanvas("c", "canvas", 800, 600);
 
   TFile *f_ws = new TFile(fpath, "read");
   //TFile *f_ws = new TFile("../xmlAnaWSBuilder/run/workspace/vbf_cp_m08/vbf_cp_m08.root", "read");
@@ -106,9 +106,10 @@ int main(int argc, char** argv)
 
   pdf->fitTo(*dataAsi);
 
-  RooPlot *myyfr = myy->frame();
+  RooPlot *myyfr = myy->frame(Bins(55));
   myyfr->GetXaxis()->SetTitle("m_{#gamma#gamma} [MeV]");
   myyfr->SetTitle("Asimov fit in "+tscat);
+  //myyfr->SetTitle(0);
   dataAsi->plotOn(myyfr, DataError(RooAbsData::Poisson));
   mu->setVal(0.);
   double nbkg_hat = w->var("nbkg_"+tscat)->getVal();

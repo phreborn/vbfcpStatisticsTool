@@ -3,9 +3,9 @@ tag=
 allJobs=jobsSub.sh
 > ${allJobs}
 
-cats=($(cat ../../nom_WS/cats.cfg | grep -v "#" | grep ":" | cut -d : -f 1))
+cats=($(cat ../../nom_WS/cats.cfg | grep -v "#" | grep ":" | cut -d : -f 1 | grep -v LL))
 
-sysList=($(cat ../xmlAnaWSBuilder/run/config/vbf_cp_m00/channel/category_OO_TT_b1.xml | grep Systematic | cut -d '"' -f 2 | grep -v ':category:' | sort | uniq))
+sysList=($(cat ../xmlAnaWSBuilder/run/config/vbf_cp_m00/channel/category_OO_LT_b1.xml | grep Systematic | cut -d '"' -f 2 | grep -v ':category:' | sort | uniq))
 
 for cat in ${cats[*]};do
   sysList[${#sysList[@]}]=ATLAS_Hgg_BIAS_OO_${cat}

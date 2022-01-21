@@ -1440,7 +1440,7 @@ int main(int argc, char **argv) {
   axis_poi->SetName("axis_poi");
   stringstream ss_poi;
   //ss_poi << "#Delta#hat{" << poiname << "}";
-  ss_poi << "#Delta#hat{" << "#mu_{VBF}" << "}";
+  ss_poi << "#Delta#hat{" << "#mu" << "}_{VBF}";
   if (useRelativeImpact)
     axis_poi->SetTitle("#Delta#hat{#mu}/#Delta#hat{#mu}_{tot}");
   // else axis_poi->SetTitle("#Delta#hat{m}_{H} [GeV]");
@@ -1539,7 +1539,7 @@ int main(int argc, char **argv) {
   if (drawPrefitImpactBand) {
     stringstream ss_poi;
     //ss_poi << "Prefit Impact on #hat{" << poiname << "}";
-    ss_poi << "Prefit Impact on #hat{" << "#mu_{VBF}" << "}";
+    ss_poi << "Prefit Impact on #hat{" << "#mu" << "}_{VBF}";
     leg->AddEntry(gr_poi_nom, ss_poi.str().c_str(), "f");
     if (nrNuis_ol > 0)
       leg->AddEntry(gr_poi_nom_ol, "Alt Prefit Impact on #hat{#mu}", "f");
@@ -1547,7 +1547,7 @@ int main(int argc, char **argv) {
   if (drawPostfitImpactBand) {
     stringstream ss_poi;
     //ss_poi << "Postfit Impact on #hat{" << poiname << "}";
-    ss_poi << "Postfit Impact on #hat{" << "#mu_{VBF}" << "}";
+    ss_poi << "Postfit Impact on #hat{" << "#mu" << "}_{VBF}";
     leg->AddEntry(gr_poi, ss_poi.str().c_str(), "f");
     if (nrNuis_ol > 0)
       leg->AddEntry(gr_poi_ol, "Alt Postfit Impact on #hat{#mu}", "f");
