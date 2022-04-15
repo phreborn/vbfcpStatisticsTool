@@ -57,6 +57,7 @@ int main(int argc, char** argv)
   char *fpath = argv[1];
   char *cat = argv[2];
   char *dScan = argv[3];
+  char *dataset = argv[4];
 
   char *pngName = Form("asimovFit/asimovFit_%s_%s.png", dScan, cat);
   TString tspngName = TString(pngName);
@@ -78,7 +79,7 @@ int main(int argc, char** argv)
   RooSimultaneous *m_pdf = dynamic_cast<RooSimultaneous*>(w->pdf("CombinedPdf")); assert (m_pdf);
   RooCategory *channelCat = (RooCategory*) (&m_pdf->indexCat());
   RooAbsCategoryLValue* m_cat = const_cast<RooAbsCategoryLValue*>(&m_pdf->indexCat());
-  RooDataSet *m_data=dynamic_cast<RooDataSet*>(w->data("asimovData_SB_SM"));
+  RooDataSet *m_data=dynamic_cast<RooDataSet*>(w->data(dataset));
   TList *m_dataList = m_data->split( *m_cat, true );
 
   RooDataSet *dataAsi = (RooDataSet *)(m_dataList->FindObject(tscat));
@@ -125,7 +126,7 @@ int main(int argc, char** argv)
   //myy->setRange("SB1", 105000, 120000);
   //myy->setRange("SB2", 130000, 160000);
   //double count_data = m_data->sumEntries("channellist==channellist::OO_TT_b1"); cout<<"yield of Asimov data:"<<count_data<<endl;
-  RooAbsData *ds_asi = w->data("asimovData_SB_SM");
+  RooAbsData *ds_asi = w->data(dataset);
   double count_asi = ds_asi->sumEntries(Form("channellist==channellist::%s", tscat.Data())); cout<<"yield of Asimov data:"<<count_asi<<endl;
   RooDataSet *m_sbdata=dynamic_cast<RooDataSet*>(w->data("combDatabinned"));
   double count_data = m_sbdata->sumEntries(Form("channellist==channellist::%s", tscat.Data())); cout<<"yield of sideband data:"<<count_data<<endl;

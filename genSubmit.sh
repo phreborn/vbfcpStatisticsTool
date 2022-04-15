@@ -1,11 +1,20 @@
 tag=
 
+cfg=AllCats
+cfg=AllCats_SMEFT
+
+dataset=asimovData_SB_SM
+dataset=combData
+
+bestfit=p01
+bestfit=p0d25
+
 allJobs=jobsSub.sh
 > ${allJobs}
 
 cats=($(cat ../../nom_WS/cats.cfg | grep -v "#" | grep ":" | cut -d : -f 1 | grep -v LL))
 
-sysList=($(cat ../xmlAnaWSBuilder/run/config/vbf_cp_m00/channel/category_OO_LT_b1.xml | grep Systematic | cut -d '"' -f 2 | grep -v ':category:' | sort | uniq))
+sysList=($(cat ../xmlAnaWSBuilder/run/config${cfg}/vbf_cp_${bestfit}/channel/category_OO_LT_b1.xml | grep Systematic | cut -d '"' -f 2 | grep -v ':category:' | sort | uniq))
 
 for cat in ${cats[*]};do
   sysList[${#sysList[@]}]=ATLAS_Hgg_BIAS_OO_${cat}
@@ -35,8 +44,8 @@ for init in ${sequence[@]};do
   echo "export CXX=/cvmfs/sft.cern.ch/lcg/releases/gcc/8.3.0/x86_64-centos7/bin/g++" >> exe_${jobName}.sh
   for num in `seq ${init} 1 ${fin}`;do
   echo "" >> exe_${jobName}.sh
-    #echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WSAllCats_SMEFT/vbf_cp_m0d00/vbf_cp_m0d00.root --workspace combWS --data asimovData_SB_SM --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_ggH[1],mu_ggH_SM[0] --parameter ${sysList[${num}]}" >> exe_${jobName}.sh
-    echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WSAllCats/vbf_cp_m00/vbf_cp_m00.root --workspace combWS --data asimovData_SB_SM --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_ggH[1],mu_ggH_SM[0] --parameter ${sysList[${num}]}" >> exe_${jobName}.sh
+    #echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WSAllCats_SMEFT/vbf_cp_m0d00/vbf_cp_m0d00.root --workspace combWS --data ${dataset} --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_ggH[1],mu_ggH_SM[0] --parameter ${sysList[${num}]}" >> exe_${jobName}.sh
+    echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WS${cfg}/vbf_cp_${bestfit}/vbf_cp_${bestfit}.root --workspace combWS --data ${dataset} --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_ggH[1],mu_ggH_SM[0] --parameter ${sysList[${num}]}" >> exe_${jobName}.sh
   done
 
   chmod +x exe_${jobName}.sh

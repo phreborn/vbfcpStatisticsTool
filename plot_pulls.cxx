@@ -1441,6 +1441,8 @@ int main(int argc, char **argv) {
   stringstream ss_poi;
   //ss_poi << "#Delta#hat{" << poiname << "}";
   ss_poi << "#Delta#hat{" << "#mu" << "}_{VBF}";
+  //ss_poi << "#Delta#hat{" << "d" << "}";
+  //ss_poi << "#Delta#hat{c}_{H#tilde{W}}";
   if (useRelativeImpact)
     axis_poi->SetTitle("#Delta#hat{#mu}/#Delta#hat{#mu}_{tot}");
   // else axis_poi->SetTitle("#Delta#hat{m}_{H} [GeV]");
@@ -1450,7 +1452,7 @@ int main(int argc, char **argv) {
   axis_poi->SetLineColor(kBlack);
   axis_poi->SetLabelColor(kBlack);
   axis_poi->SetTitleColor(kBlack);
-  axis_poi->SetLabelSize(0.024);
+  axis_poi->SetLabelSize(0.020);
   axis_poi->SetTitleSize(0.034);
 
   // axis for the nuisance parameter pull
@@ -1540,6 +1542,8 @@ int main(int argc, char **argv) {
     stringstream ss_poi;
     //ss_poi << "Prefit Impact on #hat{" << poiname << "}";
     ss_poi << "Prefit Impact on #hat{" << "#mu" << "}_{VBF}";
+    //ss_poi << "Prefit Impact on #hat{" << "d" << "}";
+    //ss_poi << "#Delta#hat{c}_{H#tilde{W}}";
     leg->AddEntry(gr_poi_nom, ss_poi.str().c_str(), "f");
     if (nrNuis_ol > 0)
       leg->AddEntry(gr_poi_nom_ol, "Alt Prefit Impact on #hat{#mu}", "f");
@@ -1548,6 +1552,8 @@ int main(int argc, char **argv) {
     stringstream ss_poi;
     //ss_poi << "Postfit Impact on #hat{" << poiname << "}";
     ss_poi << "Postfit Impact on #hat{" << "#mu" << "}_{VBF}";
+    //ss_poi << "Postfit Impact on #hat{" << "d" << "}";
+    //ss_poi << "#Delta#hat{c}_{H#tilde{W}}";
     leg->AddEntry(gr_poi, ss_poi.str().c_str(), "f");
     if (nrNuis_ol > 0)
       leg->AddEntry(gr_poi_ol, "Alt Postfit Impact on #hat{#mu}", "f");

@@ -23,6 +23,12 @@ set(EXECUTABLE_READ readWS.exe)
 set(SOURCE_FILES_READFIT readWS_fit.cxx)
 set(EXECUTABLE_READFIT readWS_fit.exe)
 
+set(SOURCE_FILES_SRFRAC cutPostFitBkg.cxx)
+set(EXECUTABLE_SRFRAC cutPostFitBkg.exe)
+
+set(SOURCE_FILES_COMBMYY combMyyPlots.cxx)
+set(EXECUTABLE_COMBMYY combMyyPlots.exe)
+
 set(SOURCE_FILES_PULLS run_pulls.cxx)
 set(EXECUTABLE_PULLS run_pulls.exe)
 
@@ -101,6 +107,12 @@ target_link_libraries(${EXECUTABLE_READ} StatisticsTools ${PROJECT_LIBRARIES})
 
 add_executable(${EXECUTABLE_READFIT} ${SOURCE_FILES_READFIT})
 target_link_libraries(${EXECUTABLE_READFIT} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_SRFRAC} ${SOURCE_FILES_SRFRAC})
+target_link_libraries(${EXECUTABLE_SRFRAC} StatisticsTools ${PROJECT_LIBRARIES})
+
+add_executable(${EXECUTABLE_COMBMYY} ${SOURCE_FILES_COMBMYY})
+target_link_libraries(${EXECUTABLE_COMBMYY} StatisticsTools ${PROJECT_LIBRARIES})
 
 add_executable(${EXECUTABLE_PULLS} ${SOURCE_FILES_PULLS})
 target_link_libraries(${EXECUTABLE_PULLS} StatisticsTools ${PROJECT_LIBRARIES})
