@@ -1,13 +1,16 @@
-tag=
+#!/bin/bash
 
-cfg=AllCats
 cfg=AllCats_SMEFT
+cfg=AllCats
 
 dataset=asimovData_SB_SM
 dataset=combData
 
 bestfit=p01
 bestfit=p0d25
+bestfit=m00
+
+folder=${cfg}_${dataset}_${bestfit}
 
 allJobs=jobsSub.sh
 > ${allJobs}
@@ -45,7 +48,7 @@ for init in ${sequence[@]};do
   for num in `seq ${init} 1 ${fin}`;do
   echo "" >> exe_${jobName}.sh
     #echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WSAllCats_SMEFT/vbf_cp_m0d00/vbf_cp_m0d00.root --workspace combWS --data ${dataset} --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_ggH[1],mu_ggH_SM[0] --parameter ${sysList[${num}]}" >> exe_${jobName}.sh
-    echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WS${cfg}/vbf_cp_${bestfit}/vbf_cp_${bestfit}.root --workspace combWS --data ${dataset} --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_ggH[1],mu_ggH_SM[0] --parameter ${sysList[${num}]}" >> exe_${jobName}.sh
+    echo "./bin/run_pulls.exe --input ../xmlAnaWSBuilder/run/WS${cfg}/vbf_cp_${bestfit}/vbf_cp_${bestfit}.root --workspace combWS --data ${dataset} --poi mu_VBF_RW[0:5] --fix mu_VBF_SM[0],mu[1],mu_yy[1],mu_ggH[1],mu_ggH_SM[0],mu_spur[1],mu_spur_SM[0] --parameter ${sysList[${num}]} --folder ${folder}" >> exe_${jobName}.sh
   done
 
   chmod +x exe_${jobName}.sh

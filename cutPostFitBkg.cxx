@@ -136,6 +136,7 @@ int main(int argc, char** argv)
       std::cout<<"fitResult: "<<par0->getVal()<<std::endl;
 
       mu_vbf_rw->setVal(0);
+      mu->setVal(0);
 
       myy->setRange("full", 105000, 160000);
       myy->setRange("SBup", 105000, 118000);

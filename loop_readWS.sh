@@ -1,5 +1,6 @@
 #!/bin/bash
 
+wsDir=WSConstrBkgPar
 wsDir=wsToy1
 wsDir=WSAllCats_SMEFT
 wsDir=WSAllCats
